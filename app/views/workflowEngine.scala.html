@@ -20,7 +20,7 @@
             <div v-if="row.item.changed">
                 <b-form @@submit="updateRecord">
                 <b-row class="sr-only">
-                    <b-form-input id="wid" v-bind:value="`${form.wid = row.item.id}`">
+                    <b-form-input v-bind:value="`${form.wid = row.item.id}`">
                     </b-form-input>
                     <b-form-input id="workflow_id" v-bind:value="`${form.workflow_id = row.item.workflow_id}`">
                     </b-form-input>
@@ -34,10 +34,13 @@
                             v-bind:value="`${form.is_last_step = row.item.is_last_step}`">
                     </b-form-input>
                 </b-row>
-                <b-button type="submit" variant="btn-primary">update</b-button>
+                <b-button type="submit" class="btn-success">update</b-button>
                 </b-form>
             </div>
             <div v-if="!row.item.changed">
+                <b-form @@submit="destroyRecord(row.item.id)">
+                    <b-button type="submit" class="btn-danger">destroy</b-button>
+                </b-form>
             </div>
         </template>
     </b-table>
@@ -67,10 +70,11 @@
     new Vue({
         el: "#vue-workflow-engine",
         data: {
-            options: ["/orders", "/items", "/attachments/:id"],
-            fields: ["wid", "workflow_id", "path", "step_id", "is_first_step", "is_last_step", "update"],
+            options: ["/orders", "/items", "/attachments/:itemId"],
+            fields: ["id", "workflow_id", "path", "step_id", "is_first_step", "is_last_step", "update"],
             addToggle: false,
             workflowEngines: [],
+            deleteRowId: 0,
             form: {
                 wid: 0,
                 workflow_id: "1",
@@ -120,6 +124,14 @@
                 var targetPath = '/workflow-engines'
                 axios.put(targetPath, params, {}).then(function(response) {
                     self.workflowEngines = response.data
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
+            destroyRecord: function(deleteId) {
+                var targetPath = '/workflow-engines' + '/' + deleteId
+                axios.delete(targetPath, {}, {}).then(function(response) {
+                    this.search()
                 }).catch(function (error) {
                     console.log(error)
                 })

@@ -20,6 +20,8 @@ POST    /workflow-engines           controllers.WorkflowEngineController.create
 
 PUT     /workflow-engines           controllers.WorkflowEngineController.update
 
+DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy(id: String)
+
 GET     /items                      controllers.ItemController.index
 GET     /items/:id                  controllers.ItemController.show(id: String)
 

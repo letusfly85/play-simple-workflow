@@ -113,4 +113,28 @@ class WorkflowEngineController @Inject()(
         BadRequest(Json.obj("error_message" -> "not found json"))
     }
   })
+
+  def destroy(id: String) = checkToken(Action { implicit request =>
+    WorkflowEngine.find(id.toInt) match {
+      case Some(engine) =>
+        Logger.info(s"deleting ${engine.id} ${engine.path}")
+        engine.destroy()
+
+      case None =>
+        Logger.info(s"not found  for ${id}")
+    }
+
+    val workflowEngines = WorkflowEngine.findAll()
+    Ok(Json.toJson(workflowEngines.map{we =>
+      WorkflowEngineEntity(
+        id = we.id,
+        workflowId = we.workflowId.getOrElse(0),
+        path = we.path.getOrElse(""),
+        stepId = we.workflowStepId.getOrElse(0),
+        isFirstStep = we.isFirstStep.getOrElse(false),
+        isLastStep = we.isLastStep.getOrElse(false)
+      )
+    }))
+  })
+
 }
