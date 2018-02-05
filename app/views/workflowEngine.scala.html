@@ -2,22 +2,63 @@
 
 @main("Welcome to Play") {
 <div id="vue-workflow-engine">
-    <b-table striped hover :items="workflowEngines">
+    <b-table striped hover :items="workflowEngines" :fields="fields">
+        <template slot="path" slot-scope="row">
+            <div v-if="row.item.editable">
+                <b-row class="mb-2">
+                    <b-form-select v-model="form.path"
+                    :options="options" class="mb-3"
+                    @@change="row.item.changed=true;">
+                    </b-form-select>
+                </b-row>
+            </div>
+            <div v-if="!row.item.editable">
+                <div v-text="row.item.path" @@click="row.item.editable = true" />
+            </div>
+        </template>
+        <template slot="update" slot-scope="row">
+            <div v-if="row.item.changed">
+                <b-form @@submit="updateRecord">
+                <b-row class="sr-only">
+                    <b-form-input id="wid" v-bind:value="`${form.wid = row.item.id}`">
+                    </b-form-input>
+                    <b-form-input id="workflow_id" v-bind:value="`${form.workflow_id = row.item.workflow_id}`">
+                    </b-form-input>
+                    <b-form-input id="step_id"
+                            v-bind:value="`${form.step_id = row.item.step_id}`">
+                    </b-form-input>
+                    <b-form-input id="is_first_step"
+                            v-bind:value="`${form.is_first_step = row.item.is_first_step}`">
+                    </b-form-input>
+                    <b-form-input id="is_last_step"
+                            v-bind:value="`${form.is_last_step = row.item.is_last_step}`">
+                    </b-form-input>
+                </b-row>
+                <b-button type="submit" variant="btn-primary">update</b-button>
+                </b-form>
+            </div>
+            <div v-if="!row.item.changed">
+            </div>
+        </template>
     </b-table>
     <button v-on:click="toggleChange(addToggle)" class="btn-outline-primary">
         {{ addToggle ? 'Cancel' : ''}} Add Workflow Record
     </button>
-    <form v-if="addToggle">
-        <div class="input-group-sm">
-            <input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control" />
-            <input id="v_text" type="text" value="" v-model="form.path" class="form-control" />
-            <input id="v_text" type="text" value="" v-model="form.step_id" class="form-control" />
-            <input id="v_text" type="checkbox" value="" v-model="form.is_first_step" class="form-control" />
-            <input id="v_text" type="checkbox" value="" v-model="form.is_last_step" class="form-control" />
+    <br/>
+    <br/>
+    <b-form @@submit="createRecord">
+        <div v-if="addToggle">
+            <b-form-input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control"></b-form-input>
+            <b-form-select v-model="form.path" :options="options" class="mb-3"></b-form-select>
+            <b-form-input value="" v-model="form.step_id" class="form-control"></b-form-input>
+            <b-form-checkbox value="" v-model="form.is_first_step" class="form-control"></b-form-checkbox>
+            <b-form-checkbox value="" v-model="form.is_last_step" class="form-control"></b-form-checkbox>
 
-            <button v-on:click="createRecord()" class="btn-primary">Add Workflow Record</button>
+            <br/>
+            <br/>
+            <b-button type="submit" variant="btn-primary">Add Workflow Record</b-button>
         </div>
-    </form>
+    </b-form>
 </div>
 <script>
     axios.defaults.xsrfHeaderName = 'Csrf-Token'
@@ -26,10 +67,13 @@
     new Vue({
         el: "#vue-workflow-engine",
         data: {
+            options: ["/orders", "/items", "/attachments/:id"],
+            fields: ["wid", "workflow_id", "path", "step_id", "is_first_step", "is_last_step", "update"],
             addToggle: false,
             workflowEngines: [],
             form: {
-                workflow_group_id: "1",
+                wid: 0,
+                workflow_id: "1",
                 path: '/',
                 step_id: 0,
                 is_first_step: false,
@@ -47,7 +91,7 @@
             createRecord: function() {
                 var params = {
                     id: 0, // dummy value
-                    workflow_id: Number(this.form.workflow_group_id),
+                    workflow_id: Number(this.form.workflow_id),
                     path: this.form.path,
                     step_id: Number(this.form.step_id),
                     is_first_step: this.form.is_first_step,
@@ -62,11 +106,35 @@
                     console.log(error)
                 })
             },
+            updateRecord: function() {
+                var params = {
+                    id: Number(this.form.wid),
+                    workflow_id: Number(this.form.workflow_id),
+                    path: this.form.path,
+                    step_id: Number(this.form.step_id),
+                    is_first_step: this.form.is_first_step,
+                    is_last_step: this.form.is_last_step
+                }
+
+                var self = this
+                var targetPath = '/workflow-engines'
+                axios.put(targetPath, params, {}).then(function(response) {
+                    self.workflowEngines = response.data
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
             search: function () {
                 var self = this
                 var targetPath = '/workflow-engines/list';
                 axios.get(targetPath, {}).then(function(response) {
-                    self.workflowEngines = response.data
+                    self.workflowEngines = response.data.map(function (engine) {
+                        engine.wid = engine.id
+                        engine.editable = false
+                        engine.changed = false
+
+                        return engine
+                    })
                 }).catch(function (error) {
                     console.log(error)
                 })

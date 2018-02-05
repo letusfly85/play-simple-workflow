@@ -57,7 +57,6 @@ class WorkflowEngineController @Inject()(
               updatedAt = new org.joda.time.DateTime
             ).save()
 
-            val workflowEngines = WorkflowEngine.findAll()
             Ok(views.html.workflowEngine("Your new application is ready."))
 
           case JsError(e) =>
@@ -71,4 +70,47 @@ class WorkflowEngineController @Inject()(
     }
   })
 
+  def update = checkToken(Action { implicit request =>
+    request.body.asJson match {
+      case Some(json) =>
+        Json.fromJson[WorkflowEngineEntity](json) match {
+          case JsSuccess(we, _) =>
+            WorkflowEngine.find(we.id) match {
+              case Some(engine) =>
+                engine.copy(
+                  path = Some(we.path),
+                  method = Some("POST"),
+                  workflowStepId = Some(we.stepId),
+                  workflowStepNextId = Some(0),
+                  isFirstStep = Some(we.isFirstStep),
+                  isLastStep = Some(we.isLastStep),
+                  updatedAt = new org.joda.time.DateTime
+                ).save()
+
+              case None =>
+                Logger.info(s"not found  for ${we.id.toString()}")
+            }
+
+            val workflowEngines = WorkflowEngine.findAll()
+            Ok(Json.toJson(workflowEngines.map{we =>
+              WorkflowEngineEntity(
+                id = we.id,
+                workflowId = we.workflowId.getOrElse(0),
+                path = we.path.getOrElse(""),
+                stepId = we.workflowStepId.getOrElse(0),
+                isFirstStep = we.isFirstStep.getOrElse(false),
+                isLastStep = we.isLastStep.getOrElse(false)
+              )
+            }))
+
+          case JsError(e) =>
+            Logger.info(s"error ${e.toString()}")
+            BadRequest(Json.obj("error_message" -> JsError.toJson(e).toString()))
+        }
+
+      case None =>
+        Logger.info("no json found")
+        BadRequest(Json.obj("error_message" -> "not found json"))
+    }
+  })
 }
