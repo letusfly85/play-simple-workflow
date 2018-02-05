@@ -79,3 +79,23 @@ scalacOptions ++= Seq(
   // https://github.com/playframework/twirl/issues/105
   "-Xlint:-unused,_"
 )
+
+import com.typesafe.config._
+
+val conf = ConfigFactory.parseFile(new File("conf/database.flyway.conf")).resolve()
+
+flywayDriver := conf.getString("db.default.driver")
+
+flywayUrl := conf.getString("db.default.url")
+
+flywayUser := conf.getString("db.default.username")
+
+flywayPassword := conf.getString("db.default.password")
+
+//flywayBaselineOnMigrate := true
+
+flywayLocations := Seq("filesystem:conf/db/migration")
+
+flywayTarget := "1.0.0"
+
+flywayBaselineVersion := "1.0.0"

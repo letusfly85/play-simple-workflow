@@ -10,3 +10,8 @@ addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6")
 
 libraryDependencies += "mysql" % "mysql-connector-java"  % "5.1.33"
 addSbtPlugin("org.scalikejdbc" %% "scalikejdbc-mapper-generator" % "3.0.+")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
+
+addSbtPlugin("org.flywaydb" % "flyway-sbt" % "4.2.0")
+resolvers += "Flyway" at "https://flywaydb.org/repo"
