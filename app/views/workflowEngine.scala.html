@@ -2,21 +2,13 @@
 
 @main("Welcome to Play") {
 <div id="vue-workflow-engine">
-    <table>
-        <th>Step Id</th>
-        <th>Path</th>
-        <tbody>
-        <tr v-for="workflowEngine in workflowEngines">
-            <td>{{ workflowEngine.id }}</td>
-            <td>{{ workflowEngine.path }}</td>
-        </tr>
-        </tbody>
-    </table>
-    <button v-on:click="toggleChange(addToggle)" class="btn-default">
+    <b-table striped hover :items="workflowEngines">
+    </b-table>
+    <button v-on:click="toggleChange(addToggle)" class="btn-outline-primary">
         {{ addToggle ? 'Cancel' : ''}} Add Workflow Record
     </button>
     <form v-if="addToggle">
-        <div class="input-group">
+        <div class="input-group-sm">
             <input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control" />
             <input id="v_text" type="text" value="" v-model="form.path" class="form-control" />
             <input id="v_text" type="text" value="" v-model="form.step_id" class="form-control" />
@@ -28,10 +20,10 @@
     </form>
 </div>
 <script>
-        axios.defaults.xsrfHeaderName = 'Csrf-Token'
-        axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
+    axios.defaults.xsrfHeaderName = 'Csrf-Token'
+    axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
-        new Vue({
+    new Vue({
         el: "#vue-workflow-engine",
         data: {
             addToggle: false,
@@ -62,24 +54,25 @@
                     is_last_step: this.form.is_last_step
                 }
 
+                var self = this
                 var targetPath = '/workflow-engines'
                 axios.post(targetPath, params, {}).then(function(response) {
-                    console.log(response.data)
+                    self.workflowEngines = response.data
                 }).catch(function (error) {
                     console.log(error)
                 })
             },
             search: function () {
+                var self = this
                 var targetPath = '/workflow-engines/list';
                 axios.get(targetPath, {}).then(function(response) {
-                    console.log(response.data)
-                    this.workflowEngines = response.data
+                    self.workflowEngines = response.data
                 }).catch(function (error) {
-                    errorHandler(error)
+                    console.log(error)
                 })
             }
         },
-        created: function() {
+        created: function () {
             this.search()
         }
     });
