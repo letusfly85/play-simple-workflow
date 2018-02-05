@@ -12,9 +12,6 @@ resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
       
 scalaVersion := "2.12.2"
 
-libraryDependencies ++= Seq(  )
-
-
 libraryDependencies ++= {
   val silhouetteVersion = "5.0.3"
   val scalikeJDBCV = "3.0.2"
@@ -80,6 +77,14 @@ scalacOptions ++= Seq(
   "-Xlint:-unused,_"
 )
 
+//********************************************************
+// ScalikeJDBC settings
+//********************************************************
+scalikejdbcSettings
+
+//********************************************************
+// FlyWay settings
+//********************************************************
 import com.typesafe.config._
 
 val conf = ConfigFactory.parseFile(new File("conf/database.flyway.conf")).resolve()
