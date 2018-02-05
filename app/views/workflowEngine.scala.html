@@ -1,0 +1,87 @@
+@(msg: String)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@main("Welcome to Play") {
+<div id="vue-workflow-engine">
+    <table>
+        <th>Step Id</th>
+        <th>Path</th>
+        <tbody>
+        <tr v-for="workflowEngine in workflowEngines">
+            <td>{{ workflowEngine.id }}</td>
+            <td>{{ workflowEngine.path }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <button v-on:click="toggleChange(addToggle)" class="btn-default">
+        {{ addToggle ? 'Cancel' : ''}} Add Workflow Record
+    </button>
+    <form v-if="addToggle">
+        <div class="input-group">
+            <input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control" />
+            <input id="v_text" type="text" value="" v-model="form.path" class="form-control" />
+            <input id="v_text" type="text" value="" v-model="form.step_id" class="form-control" />
+            <input id="v_text" type="checkbox" value="" v-model="form.is_first_step" class="form-control" />
+            <input id="v_text" type="checkbox" value="" v-model="form.is_last_step" class="form-control" />
+
+            <button v-on:click="createRecord()" class="btn-primary">Add Workflow Record</button>
+        </div>
+    </form>
+</div>
+<script>
+        axios.defaults.xsrfHeaderName = 'Csrf-Token'
+        axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
+
+        new Vue({
+        el: "#vue-workflow-engine",
+        data: {
+            addToggle: false,
+            workflowEngines: [],
+            form: {
+                workflow_group_id: "1",
+                path: '/',
+                step_id: 0,
+                is_first_step: false,
+                is_last_step: false
+            }
+        },
+        methods: {
+            toggleChange: function(toggle) {
+                if (toggle === true) {
+                    this.addToggle = false
+                } else {
+                    this.addToggle = true
+                }
+            },
+            createRecord: function() {
+                var params = {
+                    id: 0, // dummy value
+                    workflow_id: Number(this.form.workflow_group_id),
+                    path: this.form.path,
+                    step_id: Number(this.form.step_id),
+                    is_first_step: this.form.is_first_step,
+                    is_last_step: this.form.is_last_step
+                }
+
+                var targetPath = '/workflow-engines'
+                axios.post(targetPath, params, {}).then(function(response) {
+                    console.log(response.data)
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
+            search: function () {
+                var targetPath = '/workflow-engines/list';
+                axios.get(targetPath, {}).then(function(response) {
+                    console.log(response.data)
+                    this.workflowEngines = response.data
+                }).catch(function (error) {
+                    errorHandler(error)
+                })
+            }
+        },
+        created: function() {
+            this.search()
+        }
+    });
+</script>
+}
