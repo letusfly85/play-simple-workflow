@@ -24,13 +24,14 @@ class WorkflowEngineController @Inject()(
   })
 
   def list = checkToken(Action { implicit request =>
-    val workflowEngines = WorkflowEngine.findAll()
+    val workflowEngines = WorkflowEngine.findAll().sortBy(w => w.workflowStepId)
 
     Ok(Json.toJson(workflowEngines.map{we =>
       WorkflowEngineEntity(
         id = we.id,
         workflowId = we.workflowId.getOrElse(0),
         path = we.path.getOrElse(""),
+        method = we.method.getOrElse("GET"),
         stepId = we.workflowStepId.getOrElse(0),
         isFirstStep = we.isFirstStep.getOrElse(false),
         isLastStep = we.isLastStep.getOrElse(false)
@@ -46,7 +47,7 @@ class WorkflowEngineController @Inject()(
             WorkflowEngine.create(
               workflowId = Some(we.id),
               path = Some(we.path),
-              method = Some("POST"),
+              method = Some(we.method),
               workflowStepId = Some(we.stepId),
               workflowStepNextId = Some(0),
               workflowDescription = Some("description"),
@@ -97,6 +98,7 @@ class WorkflowEngineController @Inject()(
                 id = we.id,
                 workflowId = we.workflowId.getOrElse(0),
                 path = we.path.getOrElse(""),
+                method = we.method.getOrElse("GET"),
                 stepId = we.workflowStepId.getOrElse(0),
                 isFirstStep = we.isFirstStep.getOrElse(false),
                 isLastStep = we.isLastStep.getOrElse(false)
@@ -130,6 +132,7 @@ class WorkflowEngineController @Inject()(
         id = we.id,
         workflowId = we.workflowId.getOrElse(0),
         path = we.path.getOrElse(""),
+        method = we.method.getOrElse("GET"),
         stepId = we.workflowStepId.getOrElse(0),
         isFirstStep = we.isFirstStep.getOrElse(false),
         isLastStep = we.isLastStep.getOrElse(false)

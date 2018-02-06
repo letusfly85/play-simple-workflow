@@ -23,6 +23,7 @@ PUT     /workflow-engines           controllers.WorkflowEngineController.update
 DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy(id: String)
 
 GET     /items                      controllers.ItemController.index
+GET     /items                      controllers.ItemController.list
 GET     /items/:id                  controllers.ItemController.show(id: String)
 
 GET     /attachments/:itemId        controllers.AttachmentController.show(itemId: String)

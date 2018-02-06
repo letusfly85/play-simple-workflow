@@ -1,0 +1,47 @@
+@(engines: List[WorkflowEngine])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@main("Welcome to Play") {
+<div id="vue-items">
+    <b-form @@submit="goNext">
+        <b-button type="submit" class="btn-primary">Go Next Step</b-button>
+    </b-form>
+</div>
+<script>
+    axios.defaults.xsrfHeaderName = 'Csrf-Token'
+    axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
+
+    new Vue({
+        el: "#vue-items",
+        data: {
+            items: []
+        },
+        methods: {
+            goNext: function() {
+                var targetPath = '/workflow-engines/routes';
+                var params = {
+                    id: 0, // dummy value
+                    workflow_id: Number(this.form.workflow_id)
+                }
+
+                axios.post(targetPath, params, {}).then(function(response) {
+                    console.log(response.data)
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
+            search: function () {
+                var self = this
+                var targetPath = '/items/list';
+                axios.get(targetPath, {}).then(function(response) {
+                    self.items = response.data
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            }
+        },
+        created: function () {
+            this.search()
+        }
+    });
+</script>
+}
