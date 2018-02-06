@@ -5,12 +5,12 @@
     <p>@workflowStepId</p>
 <div id="vue-items">
     <b-form @@submit="goNext">
-        <b-button type="submit" class="btn-primary">Go Next Step</b-button>
+        <b-button type="submit" class="btn-outline-primary">Go Further Next Step</b-button>
     </b-form>
 </div>
 <script>
-    var workflowId = "@workflowId.toString"
-    var workflowStepId = "@workflowStepId.toString"
+    var workflowId = "@workflowId"
+    var workflowStepId = "@workflowStepId"
 
     axios.defaults.xsrfHeaderName = 'Csrf-Token'
     axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
@@ -18,7 +18,7 @@
     new Vue({
         el: "#vue-items",
         data: {
-            items: [],
+            orders: [],
             headers: {
                 workflow_step_id: 0
             }
@@ -39,9 +39,9 @@
             },
             search: function () {
                 var self = this
-                var targetPath = '/items/list';
+                var targetPath = '/orders/list';
                 axios.get(targetPath, {}).then(function(response) {
-                    self.items = response.data
+                    self.orders = response.data
                 }).catch(function (error) {
                     console.log(error)
                 })

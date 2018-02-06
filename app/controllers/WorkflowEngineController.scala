@@ -2,13 +2,15 @@ package controllers
 
 import javax.inject._
 
-import entities.WorkflowEngineEntity
+import entities.{WorkflowEngineEntity, WorkflowRoutingEntity}
 import play.api.mvc._
 import models.WorkflowEngine
 import org.webjars.play.WebJarsUtil
 import play.api.Logger
 import play.api.libs.json._
 import play.filters.csrf.{CSRFAddToken, CSRFCheck}
+
+import scalikejdbc._
 
 @Singleton
 class WorkflowEngineController @Inject()(
@@ -19,11 +21,80 @@ class WorkflowEngineController @Inject()(
   assets: AssetsFinder
 ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
+  def init = addToken(Action {implicit request =>
+    val maybeWorkflowId = request.getQueryString("workflow-id")
+    maybeWorkflowId match {
+      case Some(workflowId) =>
+        val maybeEngine = WorkflowEngine.findBy(
+          sqls.eq(WorkflowEngine.column.workflowId, workflowId)
+            .and.eq(WorkflowEngine.column.workflowStepId, 1))
+
+        maybeEngine match {
+          case Some(engine) =>
+            val path: String = engine.path.getOrElse("/workflow-engines")
+            Logger.info(engine.toString)
+            Redirect(path).flashing("workflow-id" -> workflowId, "workflow-step-id" -> "1")
+
+          case None =>
+            Redirect("/workflow-engines").withHeaders("workflow-id" -> workflowId, "workflow-step-id" -> "1")
+        }
+
+      case None =>
+        Redirect("/workflow-engines", OK)
+    }
+  })
+
+  def routes = checkToken(Action {implicit request =>
+    request.body.asJson match {
+      case Some(json) =>
+        Json.fromJson[WorkflowRoutingEntity](json) match {
+          case JsSuccess(wr, _) =>
+            val engines = WorkflowEngine.findAllBy(
+              sqls.eq(WorkflowEngine.column.workflowId, wr.workflowId))
+              .sortBy(we => we.workflowStepId)
+
+            val nextStepId = engines.drop(1).head.workflowStepId
+            val maybeEngine = WorkflowEngine.findBy(
+              sqls.eq(WorkflowEngine.column.workflowId, wr.workflowId)
+                .and.eq(WorkflowEngine.column.workflowStepId, nextStepId))
+
+            maybeEngine match {
+              case Some(engine) =>
+                val path: String = engine.path.getOrElse("/workflow-engines")
+                Logger.info(s"${path}, ${nextStepId.toString}")
+
+                Ok(Json.toJson(
+                  WorkflowEngineEntity(
+                    id = engine.id,
+                    workflowId = engine.workflowId.getOrElse(0),
+                    stepId = engine.workflowStepId.getOrElse(0),
+                    path = path,
+                    method = engine.method.getOrElse("GET"),
+                    isFirstStep = engine.isFirstStep.getOrElse(false),
+                    isLastStep = engine.isLastStep.getOrElse(false)
+                  )
+                ))
+
+              case None =>
+                Redirect("/workflow-engines", OK)
+            }
+
+          case JsError(e) =>
+            Redirect("/workflow-engines", OK)
+        }
+
+      case None =>
+        Redirect("/workflow-engines", OK)
+    }
+
+  })
+
   def index = addToken(Action { implicit request =>
     Ok(views.html.workflowEngine("Your new application is ready."))
   })
 
   def list = checkToken(Action { implicit request =>
+    Logger.info(request.headers.toString())
     val workflowEngines = WorkflowEngine.findAll().sortBy(w => w.workflowStepId)
 
     Ok(Json.toJson(workflowEngines.map{we =>
