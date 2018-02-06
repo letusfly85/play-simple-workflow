@@ -25,11 +25,8 @@ class OrderController @Inject()(
    */
   def index = addToken(Action { implicit request =>
     Logger.info("enter order controller")
-    Logger.info(request.flash.data.toString())
-    val workflowId = request.flash.get("workflow-id").getOrElse("0")
-    val workflowStepId = request.flash.get("workflow-step-id").getOrElse("0")
 
-    Ok(views.html.orders(workflowId, workflowStepId))
+    Ok(views.html.orders(""))
   })
 
   def list = Action {

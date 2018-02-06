@@ -1,17 +1,12 @@
-@(workflowId: String, workflowStepId: String)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+@(msg: String)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
 @main("Welcome to Play") {
-    <p>@workflowId</p>
-    <p>@workflowStepId</p>
 <div id="vue-items">
     <b-form @@submit="goNext">
         <b-button type="submit" class="btn-primary">Go Next Step</b-button>
     </b-form>
 </div>
 <script>
-    var workflowId = "@workflowId.toString"
-    var workflowStepId = "@workflowStepId.toString"
-
     axios.defaults.xsrfHeaderName = 'Csrf-Token'
     axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
@@ -19,16 +14,18 @@
         el: "#vue-items",
         data: {
             items: [],
-            headers: {
-                workflow_step_id: 0
-            }
+            user_id: 0,
+            workflow_id: 0,
+            workflow_step_id: 0
         },
         methods: {
             goNext: function() {
+                var self = this
                 var targetPath = '/workflow-engines/routes';
                 var params = {
-                    workflow_id: Number(workflowId),
-                    workflow_step_id: Number(workflowStepId)
+                    user_id: 0,
+                    workflow_id: Number(self.workflow_id),
+                    workflow_step_id: Number(self.workflow_step_id)
                 }
 
                 axios.post(targetPath, params, {}).then(function(response) {
@@ -42,6 +39,15 @@
                 var targetPath = '/items/list';
                 axios.get(targetPath, {}).then(function(response) {
                     self.items = response.data
+                }).catch(function (error) {
+                    console.log(error)
+                })
+
+                targetPath = '/workflow-engines/belong?user_id=' + self.user_id
+                axios.get(targetPath, {}).then(function(response) {
+                    console.log(response.data)
+                    self.workflow_id = response.data.workflow_id
+                    self.workflow_step_id = response.data.workflow_step_id
                 }).catch(function (error) {
                     console.log(error)
                 })

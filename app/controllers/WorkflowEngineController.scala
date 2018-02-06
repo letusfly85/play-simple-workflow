@@ -4,12 +4,11 @@ import javax.inject._
 
 import entities.{WorkflowEngineEntity, WorkflowRoutingEntity}
 import play.api.mvc._
-import models.WorkflowEngine
+import models.{WorkflowEngine, WorkflowStatus}
 import org.webjars.play.WebJarsUtil
 import play.api.Logger
 import play.api.libs.json._
 import play.filters.csrf.{CSRFAddToken, CSRFCheck}
-
 import scalikejdbc._
 
 @Singleton
@@ -33,14 +32,14 @@ class WorkflowEngineController @Inject()(
           case Some(engine) =>
             val path: String = engine.path.getOrElse("/workflow-engines")
             Logger.info(engine.toString)
-            Redirect(path).flashing("workflow-id" -> workflowId, "workflow-step-id" -> "1")
+            Redirect(path)
 
           case None =>
-            Redirect("/workflow-engines").withHeaders("workflow-id" -> workflowId, "workflow-step-id" -> "1")
+            Redirect("/workflow-engines")
         }
 
       case None =>
-        Redirect("/workflow-engines", OK)
+        Redirect("/workflow-engines")
     }
   })
 
@@ -53,11 +52,40 @@ class WorkflowEngineController @Inject()(
               sqls.eq(WorkflowEngine.column.workflowId, wr.workflowId))
               .sortBy(we => we.workflowStepId)
 
-            val nextStepId = engines.drop(1).head.workflowStepId
-            val maybeEngine = WorkflowEngine.findBy(
-              sqls.eq(WorkflowEngine.column.workflowId, wr.workflowId)
-                .and.eq(WorkflowEngine.column.workflowStepId, nextStepId))
+            val maybeStatus = WorkflowStatus.findBy(
+              sqls.eq(WorkflowStatus.column.workflowId, wr.workflowId)
+                .and.eq(WorkflowStatus.column.workflowStepId, wr.stepId)
+            )
+            maybeStatus match {
+              case Some(engineStatus) =>
+                Logger.info(engineStatus.toString)
+                engineStatus.copy(isExecuted = true).save()
 
+              case None =>
+                WorkflowStatus.create(
+                  workflowId = Some(wr.workflowId),
+                  workflowStepId = Some(wr.stepId),
+                  userId = 0,
+                  isExecuted = true,
+                  createdAt = new org.joda.time.DateTime,
+                  updatedAt = new org.joda.time.DateTime
+                )
+            }
+
+            val statuses =
+              WorkflowStatus.findAllBy(
+                sqls.eq(WorkflowStatus.column.userId, wr.userId)
+                  .and.eq(WorkflowStatus.column.isExecuted, false)
+                  .and.ge(WorkflowStatus.column.workflowStepId, wr.stepId))
+                .sortBy(s => s.workflowStepId)
+
+            val nextStepId =
+              statuses.nonEmpty match {
+                case true => statuses.head.workflowStepId.getOrElse(1)
+                case false => 1
+              }
+
+            val maybeEngine = WorkflowEngine.findBy(sqls.eq(WorkflowEngine.column.workflowStepId, nextStepId))
             maybeEngine match {
               case Some(engine) =>
                 val path: String = engine.path.getOrElse("/workflow-engines")
@@ -76,15 +104,15 @@ class WorkflowEngineController @Inject()(
                 ))
 
               case None =>
-                Redirect("/workflow-engines", OK)
+                Redirect("/workflow-engines")
             }
 
           case JsError(e) =>
-            Redirect("/workflow-engines", OK)
+            Redirect("/workflow-engines")
         }
 
       case None =>
-        Redirect("/workflow-engines", OK)
+        Redirect("/workflow-engines")
     }
 
   })
@@ -93,8 +121,35 @@ class WorkflowEngineController @Inject()(
     Ok(views.html.workflowEngine("Your new application is ready."))
   })
 
+  def findBelong = checkToken(Action { implicit request =>
+    val maybeUserId = request.queryString.get("user_id")
+    maybeUserId match {
+      case Some(userId) =>
+        val statuses = WorkflowStatus.findAllBy(sqls.eq(WorkflowStatus.column.userId, userId.head)).sortBy(s => s.workflowStepId)
+        if (statuses.nonEmpty) {
+          val notExecutedStatus = statuses.filter(s => s.isExecuted == false).sortBy(s => s.workflowStepId)
+
+          if (notExecutedStatus.nonEmpty) {
+            Ok(Json.toJson(WorkflowRoutingEntity(
+              notExecutedStatus.head.userId,
+              notExecutedStatus.head.workflowId.getOrElse(0),
+              notExecutedStatus.head.workflowStepId.getOrElse(0))
+            ))
+          } else {
+            Ok(Json.toJson(WorkflowRoutingEntity(
+              statuses.head.userId, statuses.head.workflowId.getOrElse(0), statuses.head.workflowStepId.getOrElse(0))
+            ))
+          }
+        } else {
+          Ok(JsObject.empty)
+        }
+
+      case None =>
+        Ok(JsObject.empty)
+    }
+  })
+
   def list = checkToken(Action { implicit request =>
-    Logger.info(request.headers.toString())
     val workflowEngines = WorkflowEngine.findAll().sortBy(w => w.workflowStepId)
 
     Ok(Json.toJson(workflowEngines.map{we =>
@@ -128,6 +183,15 @@ class WorkflowEngineController @Inject()(
               createdAt = new org.joda.time.DateTime,
               updatedAt = new org.joda.time.DateTime
             ).save()
+
+            WorkflowStatus.create(
+              workflowId = Some(we.id),
+              workflowStepId = Some(we.stepId),
+              userId = 0, //todo get from session
+              isExecuted = false,
+              createdAt = new org.joda.time.DateTime,
+              updatedAt = new org.joda.time.DateTime
+            )
 
             Ok(views.html.workflowEngine("Your new application is ready."))
 
@@ -191,6 +255,11 @@ class WorkflowEngineController @Inject()(
     WorkflowEngine.find(id.toInt) match {
       case Some(engine) =>
         Logger.info(s"deleting ${engine.id} ${engine.path}")
+
+        WorkflowStatus.findAllBy(
+          sqls.eq(WorkflowStatus.column.workflowId, engine.workflowId)
+           .and.eq(WorkflowStatus.column.workflowStepId, engine.workflowStepId)
+        ).foreach(ws => ws.destroy())
         engine.destroy()
 
       case None =>
