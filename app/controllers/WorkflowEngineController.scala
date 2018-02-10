@@ -65,12 +65,14 @@ class WorkflowEngineController @Inject()(
                 sqls.eq(WorkflowStatus.column.userId, wr.userId)
                     .and.eq(WorkflowStatus.column.workflowId, wr.workflowId)
                   .and.ge(WorkflowStatus.column.workflowStepId, wr.stepId))
-                .sortBy(s => s.workflowStepId)
             Logger.info(statuses.toString)
 
             val nextStepId =
               statuses.filter(s => !s.isExecuted).nonEmpty match {
-                case true => statuses.head.workflowStepId.getOrElse(1)
+                case true =>
+                  statuses.filter(s => !s.isExecuted)
+                  .sortBy(s => s.workflowStepId)
+                  .head.workflowStepId.getOrElse(1)
                 case false => 1
               }
 
