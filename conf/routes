@@ -16,11 +16,9 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /workflow-engines/init      controllers.WorkflowEngineController.init
 POST    /workflow-engines/routes    controllers.WorkflowEngineController.routes
 
-GET     /workflow-engines           controllers.WorkflowEngineController.list
+GET     /workflow-engines               controllers.WorkflowEngineController.list
 
-GET     /workflow-statuses/list     controllers.WorkflowStatusController.list
-
-GET     /workflow-engines/belong    controllers.WorkflowEngineController.findBelong
+GET     /workflow-engines/belong/:id    controllers.WorkflowEngineController.findBelong(id: String)
 
 POST    /workflow-engines           controllers.WorkflowEngineController.create
 
@@ -29,6 +27,10 @@ PUT     /workflow-engines           controllers.WorkflowEngineController.update
 DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy(id: String)
 
 DELETE  /workflow-engines/all/:id   controllers.WorkflowEngineController.destroyAll(id: String)
+
+GET     /workflow-statuses/:id      controllers.WorkflowStatusController.list(id: String)
+
+GET     /workflow-status-groups     controllers.WorkflowStatusController.groupList
 
 GET     /items                      controllers.ItemController.list
 GET     /items/:id                  controllers.ItemController.show(id: String)

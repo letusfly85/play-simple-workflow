@@ -48,44 +48,44 @@ class WorkflowEngineController @Inject()(
       case Some(json) =>
         Json.fromJson[WorkflowRoutingEntity](json) match {
           case JsSuccess(wr, _) =>
-            val engines = WorkflowEngine.findAllBy(
-              sqls.eq(WorkflowEngine.column.workflowId, wr.workflowId))
-              .sortBy(we => we.workflowStepId)
-
             val maybeStatus = WorkflowStatus.findBy(
               sqls.eq(WorkflowStatus.column.workflowId, wr.workflowId)
                 .and.eq(WorkflowStatus.column.workflowStepId, wr.stepId)
             )
             maybeStatus match {
-              case Some(engineStatus) =>
-                Logger.info(engineStatus.toString)
-                engineStatus.copy(isExecuted = true).save()
+              case Some(status) =>
+                Logger.info(status.toString)
+                status.copy(isExecuted = true).save()
 
               case None =>
-                WorkflowStatus.create(
-                  workflowId = Some(wr.workflowId),
-                  workflowStepId = Some(wr.stepId),
-                  userId = 0,
-                  isExecuted = true,
-                  createdAt = new org.joda.time.DateTime,
-                  updatedAt = new org.joda.time.DateTime
-                )
             }
 
             val statuses =
               WorkflowStatus.findAllBy(
                 sqls.eq(WorkflowStatus.column.userId, wr.userId)
-                  .and.eq(WorkflowStatus.column.isExecuted, false)
+                    .and.eq(WorkflowStatus.column.workflowId, wr.workflowId)
                   .and.ge(WorkflowStatus.column.workflowStepId, wr.stepId))
                 .sortBy(s => s.workflowStepId)
+            Logger.info(statuses.toString)
 
             val nextStepId =
-              statuses.nonEmpty match {
+              statuses.filter(s => !s.isExecuted).nonEmpty match {
                 case true => statuses.head.workflowStepId.getOrElse(1)
                 case false => 1
               }
 
-            val maybeEngine = WorkflowEngine.findBy(sqls.eq(WorkflowEngine.column.workflowStepId, nextStepId))
+            if (statuses.nonEmpty && statuses.forall(s => s.isExecuted)) {
+              WorkflowStatusGroup.findBy(sqls.eq(WorkflowStatusGroup.column.workflowId, wr.workflowId)) match {
+                case Some(group) =>
+                  group.copy(runningStatus = 1).save()
+                case None =>
+              }
+            }
+
+            val maybeEngine = WorkflowEngine.findBy(
+              sqls.eq(WorkflowEngine.column.workflowStepId, nextStepId)
+                .and.eq(WorkflowEngine.column.workflowId, wr.workflowId)
+            )
             maybeEngine match {
               case Some(engine) =>
                 val path: String = engine.path.getOrElse("/workflow-engines")
@@ -116,11 +116,15 @@ class WorkflowEngineController @Inject()(
 
   })
 
-  def findBelong = checkToken(Action { implicit request =>
+  def findBelong(workflowId: String) = checkToken(Action { implicit request =>
     val maybeUserId = request.queryString.get("user_id")
     maybeUserId match {
       case Some(userId) =>
-        val statuses = WorkflowStatus.findAllBy(sqls.eq(WorkflowStatus.column.userId, userId.head)).sortBy(s => s.workflowStepId)
+        val statuses =
+          WorkflowStatus.findAllBy(
+            sqls.eq(WorkflowStatus.column.userId, userId.head)
+              .and.eq(WorkflowStatus.column.workflowId, workflowId)
+          ).sortBy(s => s.workflowStepId)
         if (statuses.nonEmpty) {
           val notExecutedStatus = statuses.filter(s => s.isExecuted == false).sortBy(s => s.workflowStepId)
 

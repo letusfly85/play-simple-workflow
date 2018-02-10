@@ -1,8 +1,21 @@
 <template>
   <div id="vue-workflow-engine">
     <app-header></app-header>
-    <b-table striped hover :items="workflowList" :fields="fields">
-    </b-table>
+    <br/>
+    <div v-for="workflow in workflowList" v-bind:key="workflow.workflow_id">
+        <b-card
+          :title="String(workflow.workflow_id)"
+          style="max-width: 20rem; margin-left: 20px;"
+          class="mb-4">
+
+          <div v-if="workflow.running_status===0">
+            <b-button href="#" variant="primary">Continue Workflow</b-button>
+          </div>
+          <div v-if="!(workflow.running_status===0)">
+            <b-button href="#" class="btn-secondary" disabled>Your Workflow Done</b-button>
+          </div>
+        </b-card>
+    </div>
     <app-footer></app-footer>
   </div>
 </template>

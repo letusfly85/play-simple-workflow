@@ -65,7 +65,7 @@ export default {
         console.log(error)
       })
 
-      targetPath = baseUrl + '/workflow-engines/belong?user_id=' + self.user_id
+      targetPath = baseUrl + '/workflow-engines/belong/ ' + 0 + '?user_id=' + this.user_id
       axios.get(targetPath, {}).then(function (response) {
         console.log(response.data)
         self.workflow_id = response.data.workflow_id
@@ -74,7 +74,7 @@ export default {
         console.log(error)
       })
 
-      targetPath = baseUrl + '/workflow-statuses?user_id=' + this.user_id
+      targetPath = baseUrl + '/workflow-statuses/' + 0 + '?user_id=' + this.user_id
       axios.get(targetPath, {}).then(function (response) {
         console.log(response.data)
         self.workflow_statuses = response.data

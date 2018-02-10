@@ -25,7 +25,7 @@ class WorkflowStatusController @Inject()(
   val wsg = WorkflowStatusGroup.syntax("wsg")
   val weg = WorkflowEngineGroup.syntax("weg")
 
-  def list = checkToken(Action { implicit request =>
+  def list(workflowId: String) = checkToken(Action { implicit request =>
     val statusList =
       DB localTx { implicit session =>
         withSQL {
@@ -34,6 +34,7 @@ class WorkflowStatusController @Inject()(
             .innerJoin(WorkflowEngine as we)
             .on(ws.workflowId, we.workflowId)
             .where.eq(ws.workflowStepId, we.workflowStepId)
+            .and.eq(ws.workflowId, workflowId)
         }.map(res => (WorkflowStatus(ws)(res), WorkflowEngine(we)(res))).list.apply
       }
 
