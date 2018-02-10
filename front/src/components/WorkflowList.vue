@@ -2,14 +2,17 @@
   <div id="vue-workflow-engine">
     <app-header></app-header>
     <br/>
-    <div v-for="workflow in workflowList" v-bind:key="workflow.workflow_id">
+    <div v-for="workflow in workflowList" v-bind:key="workflow.id">
         <b-card
           :title="String(workflow.workflow_id)"
           style="max-width: 20rem; margin-left: 20px;"
-          class="mb-4">
+          class="mb-4"
+        >
 
           <div v-if="workflow.running_status===0">
-            <b-button href="#" variant="primary">Continue Workflow</b-button>
+            <b-form @submit="continueWorkflow(workflow.workflow_id)">
+              <b-button type="submit"  variant="primary">Continue Workflow</b-button>
+            </b-form>
           </div>
           <div v-if="!(workflow.running_status===0)">
             <b-button href="#" class="btn-secondary" disabled>Your Workflow Done</b-button>
@@ -24,12 +27,13 @@
 import axios from 'axios'
 import AppHeader from './utils/AppHeader'
 import AppFooter from './utils/AppFooter'
+
 const baseUrl = 'http://localhost:9000'
 axios.defaults.xsrfHeaderName = 'Csrf-Token'
 axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
 export default {
-  name: 'WorkflowEngine',
+  name: 'WorkflowList',
   components: { AppHeader, AppFooter },
   data () {
     return {
@@ -44,6 +48,17 @@ export default {
       axios.get(targetPath).then(response => {
         this.workflowList = response.data
       }).catch(error => {
+        console.log(error)
+      })
+    },
+    continueWorkflow: function (workflowId) {
+      let targetPath = baseUrl + '/workflow-engines/init?workflow-id=' + workflowId
+
+      event.preventDefault()
+      axios.get(targetPath, {}).then(response => {
+        console.log(response.data.path)
+        this.$router.push(response.data.path)
+      }).catch(function (error) {
         console.log(error)
       })
     }

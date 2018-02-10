@@ -30,9 +30,18 @@ class WorkflowEngineController @Inject()(
 
         maybeEngine match {
           case Some(engine) =>
-            val path: String = engine.path.getOrElse("/workflow-engines")
             Logger.info(engine.toString)
-            Redirect(path)
+
+            Ok(Json.toJson(
+              WorkflowEngineEntity(
+                id = engine.id,
+                workflowId = workflowId.toInt,
+                stepId = engine.workflowStepId.getOrElse(0),
+                path = engine.path.getOrElse("/workflow-engines"),
+                isFirstStep = engine.isFirstStep.getOrElse(false),
+                isLastStep = engine.isLastStep.getOrElse(false)
+              )
+            ))
 
           case None =>
             Redirect("/workflow-engines")
@@ -55,7 +64,10 @@ class WorkflowEngineController @Inject()(
             maybeStatus match {
               case Some(status) =>
                 Logger.info(status.toString)
-                status.copy(isExecuted = true).save()
+                status.copy(
+                  isExecuted = true,
+                  updatedAt = new org.joda.time.DateTime
+                ).save()
 
               case None =>
             }
@@ -79,7 +91,10 @@ class WorkflowEngineController @Inject()(
             if (statuses.nonEmpty && statuses.forall(s => s.isExecuted)) {
               WorkflowStatusGroup.findBy(sqls.eq(WorkflowStatusGroup.column.workflowId, wr.workflowId)) match {
                 case Some(group) =>
-                  group.copy(runningStatus = 1).save()
+                  group.copy(
+                    runningStatus = 1,
+                    updatedAt = new org.joda.time.DateTime
+                  ).save()
                 case None =>
               }
             }
