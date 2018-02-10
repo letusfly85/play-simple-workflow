@@ -2,7 +2,9 @@ organization := "io.wonder-soft"
 
 name := "simple-workflow"
 
-version := "1.0.2-SNAPSHOT"
+val _version = "1.0.3"
+
+version := s"${_version}-SNAPSHOT"
 
 lazy val `simple_workflow` = (project in file(".")).enablePlugins(PlayScala)
 
@@ -101,6 +103,6 @@ flywayPassword := conf.getString("db.default.password")
 
 flywayLocations := Seq("filesystem:conf/db/migration")
 
-flywayTarget := "1.0.2"
+flywayTarget := _version
 
 flywayBaselineVersion := "1.0.0"

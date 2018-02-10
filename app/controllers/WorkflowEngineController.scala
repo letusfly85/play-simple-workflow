@@ -195,7 +195,6 @@ class WorkflowEngineController @Inject()(
                   workflowId = we.workflowId,
                   beforeWorkflowId = None,
                   conditionToStart = None,
-                  runningStatus = 0,
                   createdAt = new org.joda.time.DateTime,
                   updatedAt = new org.joda.time.DateTime
                 )
