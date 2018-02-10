@@ -2,9 +2,11 @@
   <div id="Item">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
-        <ol v-for="workflow_status in workflow_statuses" v-bind:key="workflow_status.id">
-          <li class="breadcrumb-item"><a v-bind:href="'#' + workflow_status.path">{{ workflow_status.path }}</a></li>
-        </ol>
+        <div v-for="workflow_status in workflow_statuses" v-bind:key="workflow_status.id">
+          <li class="breadcrumb-item" style="margin-left:15px;">
+            <a v-bind:href="'#' + workflow_status.path">{{ workflow_status.path }}</a>
+          </li>
+        </div>
       </ol>
     </nav>
     <div>
