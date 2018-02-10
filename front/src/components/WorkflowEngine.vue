@@ -1,6 +1,11 @@
 <template>
   <div id="vue-workflow-engine">
     <app-header></app-header>
+
+    <b-card
+      title="Workflow Scheme"
+      style="margin-top: 5px; margin-right: 5px; margin-left: 5px;"
+    >
     <b-table striped hover :items="workflowEngines" :fields="fields">
       <template slot="path" slot-scope="row">
         <div v-if="row.item.editable">
@@ -66,6 +71,7 @@
     <b-form @submit="destroyAllRecord">
       <b-button type="submit" class="btn-danger">Destroy All Workflow Record</b-button>
     </b-form>
+    </b-card>
     <app-footer></app-footer>
   </div>
 </template>

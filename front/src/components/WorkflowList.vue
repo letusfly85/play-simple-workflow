@@ -1,7 +1,10 @@
 <template>
   <div id="vue-workflow-engine">
     <app-header></app-header>
-    <br/>
+    <b-card
+      title="Workflow List"
+      style="margin-top: 5px; margin-right: 5px; margin-left: 5px;"
+    >
     <div v-for="workflow in workflowList" v-bind:key="workflow.id">
         <b-card
           :title="String(workflow.workflow_id)"
@@ -19,6 +22,7 @@
           </div>
         </b-card>
     </div>
+    </b-card>
     <app-footer></app-footer>
   </div>
 </template>
