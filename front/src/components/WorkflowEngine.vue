@@ -50,7 +50,7 @@
     <br/>
     <b-form @submit="createRecord">
       <div v-if="addToggle">
-        <b-form-input id="v_text" type="text" value="" v-model="form.workflow_id" class="form-control"></b-form-input>
+        <b-form-input value="" v-model="form.workflow_id" class="form-control"></b-form-input>
         <br/>
         <b-form-select v-model="form.path" :options="options" class="mb-3"></b-form-select>
         <b-form-input value="" v-model="form.step_id" class="form-control"></b-form-input>
@@ -131,6 +131,7 @@ export default {
         is_first_step: this.form.is_first_step,
         is_last_step: this.form.is_last_step
       }
+      console.log(params)
 
       var targetPath = baseUrl + '/workflow-engines'
       axios.post(targetPath, params, {}).then(response => {

@@ -4,7 +4,7 @@ import javax.inject._
 
 import entities.{WorkflowEngineEntity, WorkflowRoutingEntity}
 import play.api.mvc._
-import models.{WorkflowEngine, WorkflowStatus}
+import models.{WorkflowEngine, WorkflowEngineGroup, WorkflowStatus}
 import org.webjars.play.WebJarsUtil
 import play.api.Logger
 import play.api.libs.json._
@@ -145,7 +145,7 @@ class WorkflowEngineController @Inject()(
   })
 
   def list = checkToken(Action { implicit request =>
-    val workflowEngines = WorkflowEngine.findAll().sortBy(w => w.workflowStepId)
+    val workflowEngines = WorkflowEngine.findAll().sortBy(w => (w.workflowId, w.workflowStepId))
 
     Ok(Json.toJson(workflowEngines.map{we =>
       WorkflowEngineEntity(
@@ -165,7 +165,7 @@ class WorkflowEngineController @Inject()(
         Json.fromJson[WorkflowEngineEntity](json) match {
           case JsSuccess(we, _) =>
             WorkflowEngine.create(
-              workflowId = Some(we.id),
+              workflowId = Some(we.workflowId),
               path = Some(we.path),
               workflowStepId = Some(we.stepId),
               workflowStepNextId = Some(0),
@@ -178,13 +178,28 @@ class WorkflowEngineController @Inject()(
             ).save()
 
             WorkflowStatus.create(
-              workflowId = Some(we.id),
+              workflowId = Some(we.workflowId),
               workflowStepId = Some(we.stepId),
               userId = 0, //todo get from session
               isExecuted = false,
               createdAt = new org.joda.time.DateTime,
               updatedAt = new org.joda.time.DateTime
             )
+
+            val maybeWorkflowGroup = WorkflowEngineGroup.findBy(sqls.eq(WorkflowEngineGroup.column.workflowId, we.workflowId))
+            maybeWorkflowGroup match {
+              case Some(_) =>
+              case None =>
+                WorkflowEngineGroup.create(
+                  workflowGroupId = 0,
+                  workflowId = we.workflowId,
+                  beforeWorkflowId = None,
+                  conditionToStart = None,
+                  runningStatus = 0,
+                  createdAt = new org.joda.time.DateTime,
+                  updatedAt = new org.joda.time.DateTime
+                )
+            }
 
             Ok(JsObject.empty)
 
@@ -246,6 +261,12 @@ class WorkflowEngineController @Inject()(
     WorkflowEngine.find(id.toInt) match {
       case Some(engine) =>
         Logger.info(s"deleting ${engine.id} ${engine.path}")
+        if (WorkflowEngine.findAllBy(sqls.eq(WorkflowEngine.column.workflowId, engine.workflowId)).length == 1) {
+          WorkflowEngineGroup.findAllBy(sqls.eq(WorkflowEngineGroup.column.workflowId, engine.workflowId))
+            .foreach { group =>
+              group.destroy()
+            }
+        }
 
         WorkflowStatus.findAllBy(
           sqls.eq(WorkflowStatus.column.workflowId, engine.workflowId)
@@ -257,17 +278,7 @@ class WorkflowEngineController @Inject()(
         Logger.info(s"not found  for ${id}")
     }
 
-    val workflowEngines = WorkflowEngine.findAll()
-    Ok(Json.toJson(workflowEngines.map{we =>
-      WorkflowEngineEntity(
-        id = we.id,
-        workflowId = we.workflowId.getOrElse(0),
-        path = we.path.getOrElse(""),
-        stepId = we.workflowStepId.getOrElse(0),
-        isFirstStep = we.isFirstStep.getOrElse(false),
-        isLastStep = we.isLastStep.getOrElse(false)
-      )
-    }))
+    Ok(JsObject.empty)
   })
 
   def destroyAll(workflowId: String) = checkToken(Action { implicit request =>
@@ -279,6 +290,9 @@ class WorkflowEngineController @Inject()(
             .and.eq(WorkflowStatus.column.workflowStepId, engine.workflowStepId)
         ).foreach(ws => ws.destroy())
         engine.destroy()
+    }
+    WorkflowEngineGroup.findAllBy(sqls.eq(WorkflowEngineGroup.column.workflowId, workflowId)).foreach { group =>
+      group.destroy()
     }
 
     Ok(JsObject.empty)
