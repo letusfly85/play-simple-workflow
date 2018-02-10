@@ -20,6 +20,7 @@ export default {
   data () {
     return {
       items: [],
+      workflow_statuses: [],
       user_id: 0,
       workflow_id: 0,
       workflow_step_id: 0
@@ -56,6 +57,14 @@ export default {
         console.log(response.data)
         self.workflow_id = response.data.workflow_id
         self.workflow_step_id = response.data.workflow_step_id
+      }).catch(function (error) {
+        console.log(error)
+      })
+
+      targetPath = baseUrl + '/workflow-statues/list?user_id=' + this.user_id
+      axios.get(targetPath, {}).then(function (response) {
+        console.log(response.data)
+        self.workflow_statuses = response.data
       }).catch(function (error) {
         console.log(error)
       })

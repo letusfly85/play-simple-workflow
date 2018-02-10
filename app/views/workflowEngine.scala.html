@@ -49,6 +49,11 @@
     </button>
     <br/>
     <br/>
+    <b-form @@submit="destroyAllRecord">
+        <b-button type="submit" class="btn-danger">Destroy All Workflow Record</b-button>
+    </b-form>
+    <br/>
+    <br/>
     <b-form @@submit="createRecord">
         <div v-if="addToggle">
             <b-form-input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control"></b-form-input>
@@ -135,6 +140,14 @@
             },
             destroyRecord: function(deleteId) {
                 var targetPath = '/workflow-engines' + '/' + deleteId
+                axios.delete(targetPath, {}, {}).then(function(response) {
+                    this.search()
+                }).catch(function (error) {
+                    console.log(error)
+                })
+            },
+            destroyAllRecord: function() {
+                var targetPath = '/workflow-engines/all' + '/' + '0'
                 axios.delete(targetPath, {}, {}).then(function(response) {
                     this.search()
                 }).catch(function (error) {

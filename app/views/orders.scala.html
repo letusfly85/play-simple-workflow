@@ -1,7 +1,16 @@
 @(msg: String)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
 @main("Welcome to Play") {
-<div id="vue-items">
+<!--
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Order</a></li>
+        <li class="breadcrumb-item"><a href="#">Items</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Order Confirm</li>
+    </ol>
+</nav>
+-->
+<div id="vue-orders">
     <b-form @@submit="goNext">
         <b-button type="submit" class="btn-outline-primary">Go Further Next Step</b-button>
     </b-form>
@@ -11,7 +20,7 @@
     axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
     new Vue({
-        el: "#vue-items",
+        el: "#vue-orders",
         data: {
             orders: [],
             user_id: 0,
@@ -19,28 +28,32 @@
             workflow_step_id: 0
         },
         methods: {
-            goNext: function() {
+            goNext: function(event) {
+                var self = this;
                 var targetPath = '/workflow-engines/routes';
-                var self = this
                 var params = {
                     user_id: 0,
                     workflow_id: Number(self.workflow_id),
                     workflow_step_id: Number(self.workflow_step_id)
-                }
+                };
 
                 axios.post(targetPath, params, {}).then(function(response) {
-                    window.location = response.data.path
+                    window.location = response.data.path;
+                    event.stopPropagation();
+                    return false;
                 }).catch(function (error) {
-                    console.log(error)
-                })
+                    console.log(error);
+                });
+
+                return false;
             },
             search: function () {
                 var self = this
                 var targetPath = '/orders/list';
                 axios.get(targetPath, {}).then(function(response) {
-                    self.orders = response.data
+                    self.orders = response.data;
                 }).catch(function (error) {
-                    console.log(error)
+                    console.log(error);
                 })
 
                 targetPath = '/workflow-engines/belong?user_id=' + self.user_id
