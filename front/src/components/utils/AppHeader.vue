@@ -10,7 +10,7 @@
 
       <b-navbar-nav>
         <b-nav-item href="#/workflow-engines">Workflow Scheme</b-nav-item>
-        <b-nav-item href="#">Workflow List</b-nav-item>
+        <b-nav-item href="#/workflow-list">Workflow List</b-nav-item>
         <!--<b-nav-item href="#" disabled>Disabled</b-nav-item> -->
       </b-navbar-nav>
 

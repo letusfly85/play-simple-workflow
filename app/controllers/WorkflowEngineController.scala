@@ -4,7 +4,7 @@ import javax.inject._
 
 import entities.{WorkflowEngineEntity, WorkflowRoutingEntity}
 import play.api.mvc._
-import models.{WorkflowEngine, WorkflowEngineGroup, WorkflowStatus}
+import models.{WorkflowEngine, WorkflowEngineGroup, WorkflowStatus, WorkflowStatusGroup}
 import org.webjars.play.WebJarsUtil
 import play.api.Logger
 import play.api.libs.json._
@@ -186,8 +186,8 @@ class WorkflowEngineController @Inject()(
               updatedAt = new org.joda.time.DateTime
             )
 
-            val maybeWorkflowGroup = WorkflowEngineGroup.findBy(sqls.eq(WorkflowEngineGroup.column.workflowId, we.workflowId))
-            maybeWorkflowGroup match {
+            val maybeEngineGroup = WorkflowEngineGroup.findBy(sqls.eq(WorkflowEngineGroup.column.workflowId, we.workflowId))
+            maybeEngineGroup match {
               case Some(_) =>
               case None =>
                 WorkflowEngineGroup.create(
@@ -195,6 +195,20 @@ class WorkflowEngineController @Inject()(
                   workflowId = we.workflowId,
                   beforeWorkflowId = None,
                   conditionToStart = None,
+                  createdAt = new org.joda.time.DateTime,
+                  updatedAt = new org.joda.time.DateTime
+                )
+            }
+
+            val maybeStatusGroup = WorkflowStatusGroup.findBy(sqls.eq(WorkflowEngineGroup.column.workflowId, we.workflowId))
+            maybeStatusGroup match {
+              case Some(_) =>
+              case None =>
+                WorkflowStatusGroup.create(
+                  userId = 0,
+                  workflowGroupId = 0,
+                  workflowId = we.workflowId,
+                  runningStatus = 0,
                   createdAt = new org.joda.time.DateTime,
                   updatedAt = new org.joda.time.DateTime
                 )
@@ -265,6 +279,10 @@ class WorkflowEngineController @Inject()(
             .foreach { group =>
               group.destroy()
             }
+          WorkflowStatusGroup.findAllBy(sqls.eq(WorkflowStatusGroup.column.workflowId, engine.workflowId))
+            .foreach { group =>
+              group.destroy()
+            }
         }
 
         WorkflowStatus.findAllBy(
@@ -290,9 +308,8 @@ class WorkflowEngineController @Inject()(
         ).foreach(ws => ws.destroy())
         engine.destroy()
     }
-    WorkflowEngineGroup.findAllBy(sqls.eq(WorkflowEngineGroup.column.workflowId, workflowId)).foreach { group =>
-      group.destroy()
-    }
+    WorkflowEngineGroup.findAllBy(sqls.eq(WorkflowEngineGroup.column.workflowId, workflowId)).foreach(g => g.destroy)
+    WorkflowStatusGroup.findAllBy(sqls.eq(WorkflowStatusGroup.column.workflowId, workflowId)).foreach(g => g.destroy)
 
     Ok(JsObject.empty)
   })

@@ -75,7 +75,7 @@ export default {
         console.log(error)
       })
 
-      targetPath = baseUrl + '/workflow-statuses/list?user_id=' + this.user_id
+      targetPath = baseUrl + '/workflow-statuses?user_id=' + this.user_id
       axios.get(targetPath, {}).then(function (response) {
         console.log(response.data)
         self.workflow_statuses = response.data

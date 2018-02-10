@@ -2,8 +2,8 @@ package controllers
 
 import javax.inject._
 
-import entities.WorkflowStatusEntity
-import models.{WorkflowEngine, WorkflowStatus}
+import entities.{WorkflowStatusEntity, WorkflowStatusGroupEntity}
+import models.{WorkflowEngine, WorkflowEngineGroup, WorkflowStatus, WorkflowStatusGroup}
 import org.webjars.play.WebJarsUtil
 import play.api.libs.json._
 import play.api.mvc._
@@ -21,8 +21,11 @@ class WorkflowStatusController @Inject()(
 
   val ws = WorkflowStatus.syntax("ws")
   val we = WorkflowEngine.syntax("we")
-  def list = checkToken(Action { implicit request =>
 
+  val wsg = WorkflowStatusGroup.syntax("wsg")
+  val weg = WorkflowEngineGroup.syntax("weg")
+
+  def list = checkToken(Action { implicit request =>
     val statusList =
       DB localTx { implicit session =>
         withSQL {
@@ -42,6 +45,28 @@ class WorkflowStatusController @Inject()(
           path = we.path.getOrElse(""),
           stepId = ws.workflowStepId.getOrElse(0),
           isExecuted = ws.isExecuted
+        )
+      }
+    ))
+  })
+
+  def groupList = checkToken(Action { implicit request =>
+    val statusList =
+      DB localTx { implicit session =>
+        withSQL {
+          select
+            .from(WorkflowStatusGroup as wsg)
+            .innerJoin(WorkflowEngineGroup as weg)
+            .on(wsg.workflowId, weg.workflowId)
+        }.map(res => (WorkflowStatusGroup(wsg)(res), WorkflowEngineGroup(weg)(res))).list.apply
+      }
+
+    Ok(Json.toJson(
+      statusList.map { case (wsg, weg) =>
+        WorkflowStatusGroupEntity(
+          id = wsg.id,
+          workflowId = wsg.workflowId,
+          runningStatus = wsg.runningStatus
         )
       }
     ))

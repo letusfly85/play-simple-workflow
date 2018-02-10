@@ -4,6 +4,7 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import WorkflowEngine from '../components/WorkflowEngine'
+import WorkflowList from '../components/WorkflowList'
 import Item from '../components/Item'
 import Order from '../components/Order'
 
@@ -16,6 +17,11 @@ export default new Router({
       path: '/workflow-engines',
       name: 'WorkflowEngine',
       component: WorkflowEngine
+    },
+    {
+      path: '/workflow-list',
+      name: 'WorkflowList',
+      component: WorkflowList
     },
     {
       path: '/items',
