@@ -1,5 +1,6 @@
 <template>
   <div id="vue-workflow-engine">
+    <app-header></app-header>
     <b-table striped hover :items="workflowEngines" :fields="fields">
       <template slot="path" slot-scope="row">
         <div v-if="row.item.editable">
@@ -66,17 +67,21 @@
     <b-form @submit="destroyAllRecord">
       <b-button type="submit" class="btn-danger">Destroy All Workflow Record</b-button>
     </b-form>
+    <app-footer></app-footer>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import AppHeader from './utils/AppHeader'
+import AppFooter from './utils/AppFooter'
 const baseUrl = 'http://localhost:9000'
 axios.defaults.xsrfHeaderName = 'Csrf-Token'
 axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
 export default {
   name: 'WorkflowEngine',
+  components: { AppHeader, AppFooter },
   data () {
     return {
       options: ['/orders', '/items', '/attachments/:itemId'],
@@ -160,7 +165,7 @@ export default {
     },
     search: function () {
       var self = this
-      var targetPath = baseUrl + '/workflow-engines/list'
+      var targetPath = baseUrl + '/workflow-engines'
       axios.get(targetPath, {}).then(function (response) {
         self.workflowEngines = response.data.map(function (engine) {
           engine.wid = engine.id

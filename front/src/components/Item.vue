@@ -1,5 +1,6 @@
 <template>
   <div id="Item">
+    <app-header></app-header>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <div v-for="workflow_status in workflow_statuses" v-bind:key="workflow_status.id">
@@ -15,17 +16,21 @@
     <b-form @submit="goNext">
       <b-button type="submit" class="btn-primary">Go Next Step</b-button>
     </b-form>
+    <app-footer></app-footer>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import AppHeader from './utils/AppHeader'
+import AppFooter from './utils/AppFooter'
 const baseUrl = 'http://localhost:9000'
 axios.defaults.xsrfHeaderName = 'Csrf-Token'
 axios.defaults.xsrfCookieName = 'PLAY_CSRF_TOKEN'
 
 export default {
   name: 'Item',
+  components: { AppHeader, AppFooter },
   data () {
     return {
       items: [],
