@@ -50,7 +50,7 @@
     <br/>
     <b-form @submit="createRecord">
       <div v-if="addToggle">
-        <b-form-input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control"></b-form-input>
+        <b-form-input id="v_text" type="text" value="" v-model="form.workflow_id" class="form-control"></b-form-input>
         <br/>
         <b-form-select v-model="form.path" :options="options" class="mb-3"></b-form-select>
         <b-form-input value="" v-model="form.step_id" class="form-control"></b-form-input>
@@ -83,7 +83,7 @@ export default {
   components: { AppHeader, AppFooter },
   data () {
     return {
-      options: ['/orders', '/items', '/attachments/:itemId'],
+      options: ['/orders', '/items', '/attachments'],
       fields: ['id', 'workflow_id', 'path', 'step_id', 'is_first_step', 'is_last_step', 'update'],
       addToggle: false,
       workflowEngines: [],
@@ -106,6 +106,22 @@ export default {
         this.addToggle = true
       }
     },
+    research: function () {
+      let targetPath = baseUrl + '/workflow-engines'
+
+      axios.get(targetPath).then(response => {
+        this.workflowEngines = response.data.map(function (engine) {
+          engine.wid = engine.id
+          engine.editable = false
+          engine.changed = false
+          engine.update = false
+
+          return engine
+        })
+      }).catch(error => {
+        console.log(error)
+      })
+    },
     createRecord: function () {
       var params = {
         id: 0, // dummy value
@@ -116,11 +132,10 @@ export default {
         is_last_step: this.form.is_last_step
       }
 
-      var self = this
       var targetPath = baseUrl + '/workflow-engines'
-      axios.post(targetPath, params, {}).then(function (response) {
-        self.workflowEngines = response.data
-      }).catch(function (error) {
+      axios.post(targetPath, params, {}).then(response => {
+        this.research()
+      }).catch(error => {
         console.log(error)
       })
     },
@@ -134,48 +149,32 @@ export default {
         is_last_step: this.form.is_last_step
       }
 
-      var self = this
       var targetPath = baseUrl + '/workflow-engines'
-      axios.put(targetPath, params, {}).then(function (response) {
-        self.workflowEngines = response.data
-      }).catch(function (error) {
+      axios.put(targetPath, params, {}).then(response => {
+        this.research()
+      }).catch(error => {
         console.log(error)
       })
     },
     destroyRecord: function (deleteId) {
       var targetPath = baseUrl + '/workflow-engines' + '/' + deleteId
-      axios.delete(targetPath, {}).then(
-        this.search()
-      ).catch(function (error) {
+      axios.delete(targetPath, {}).then(response => {
+        this.research()
+      }).catch(error => {
         console.log(error)
       })
     },
     destroyAllRecord: function () {
-      var targetPath = '/workflow-engines/all' + '/' + '0'
-      axios.delete(targetPath, {}).then(
-        this.search()
-      ).catch(function (error) {
-        console.log(error)
-      })
-    },
-    search: function () {
-      var self = this
-      var targetPath = baseUrl + '/workflow-engines'
-      axios.get(targetPath, {}).then(function (response) {
-        self.workflowEngines = response.data.map(function (engine) {
-          engine.wid = engine.id
-          engine.editable = false
-          engine.changed = false
-
-          return engine
-        })
-      }).catch(function (error) {
+      var targetPath = baseUrl + '/workflow-engines/all' + '/' + '0'
+      axios.delete(targetPath, {}).then(response => {
+        this.research()
+      }).catch(error => {
         console.log(error)
       })
     }
   },
   created: function () {
-    this.search()
+    this.research()
   }
 }
 </script>
