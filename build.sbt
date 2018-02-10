@@ -1,15 +1,15 @@
 organization := "io.wonder-soft"
 
 name := "simple-workflow"
- 
-version := "1.0.1-SNAPSHOT"
-      
+
+version := "1.0.2-SNAPSHOT"
+
 lazy val `simple_workflow` = (project in file(".")).enablePlugins(PlayScala)
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-      
+
 resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
-      
+
 scalaVersion := "2.12.2"
 
 libraryDependencies ++= {
@@ -101,6 +101,6 @@ flywayPassword := conf.getString("db.default.password")
 
 flywayLocations := Seq("filesystem:conf/db/migration")
 
-flywayTarget := "1.0.1"
+flywayTarget := "1.0.2"
 
 flywayBaselineVersion := "1.0.0"

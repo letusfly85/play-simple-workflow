@@ -97,7 +97,6 @@ class WorkflowEngineController @Inject()(
                     workflowId = engine.workflowId.getOrElse(0),
                     stepId = engine.workflowStepId.getOrElse(0),
                     path = path,
-                    method = engine.method.getOrElse("GET"),
                     isFirstStep = engine.isFirstStep.getOrElse(false),
                     isLastStep = engine.isLastStep.getOrElse(false)
                   )
@@ -153,7 +152,6 @@ class WorkflowEngineController @Inject()(
         id = we.id,
         workflowId = we.workflowId.getOrElse(0),
         path = we.path.getOrElse(""),
-        method = we.method.getOrElse("GET"),
         stepId = we.workflowStepId.getOrElse(0),
         isFirstStep = we.isFirstStep.getOrElse(false),
         isLastStep = we.isLastStep.getOrElse(false)
@@ -169,7 +167,6 @@ class WorkflowEngineController @Inject()(
             WorkflowEngine.create(
               workflowId = Some(we.id),
               path = Some(we.path),
-              method = Some(we.method),
               workflowStepId = Some(we.stepId),
               workflowStepNextId = Some(0),
               workflowDescription = Some("description"),
@@ -211,7 +208,6 @@ class WorkflowEngineController @Inject()(
               case Some(engine) =>
                 engine.copy(
                   path = Some(we.path),
-                  method = Some("POST"),
                   workflowStepId = Some(we.stepId),
                   workflowStepNextId = Some(0),
                   isFirstStep = Some(we.isFirstStep),
@@ -229,7 +225,6 @@ class WorkflowEngineController @Inject()(
                 id = we.id,
                 workflowId = we.workflowId.getOrElse(0),
                 path = we.path.getOrElse(""),
-                method = we.method.getOrElse("GET"),
                 stepId = we.workflowStepId.getOrElse(0),
                 isFirstStep = we.isFirstStep.getOrElse(false),
                 isLastStep = we.isLastStep.getOrElse(false)
@@ -268,7 +263,6 @@ class WorkflowEngineController @Inject()(
         id = we.id,
         workflowId = we.workflowId.getOrElse(0),
         path = we.path.getOrElse(""),
-        method = we.method.getOrElse("GET"),
         stepId = we.workflowStepId.getOrElse(0),
         isFirstStep = we.isFirstStep.getOrElse(false),
         isLastStep = we.isLastStep.getOrElse(false)

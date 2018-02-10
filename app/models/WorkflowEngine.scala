@@ -9,7 +9,6 @@ case class WorkflowEngine(
   workflowName: Option[String] = None,
   workflowDescription: Option[String] = None,
   path: Option[String] = None,
-  method: Option[String] = None,
   enableRole: Option[String] = None,
   workflowStepId: Option[Int] = None,
   workflowStepNextId: Option[Int] = None,
@@ -32,7 +31,7 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
 
   override val tableName = "workflow_engine"
 
-  override val columns = Seq("id", "workflow_id", "workflow_name", "workflow_description", "path", "method", "enable_role", "workflow_step_id", "workflow_step_next_id", "condition_for_next_step", "is_first_step", "is_last_step", "created_at", "updated_at")
+  override val columns = Seq("id", "workflow_id", "workflow_name", "workflow_description", "path", "enable_role", "workflow_step_id", "workflow_step_next_id", "condition_for_next_step", "is_first_step", "is_last_step", "created_at", "updated_at")
 
   def apply(we: SyntaxProvider[WorkflowEngine])(rs: WrappedResultSet): WorkflowEngine = apply(we.resultName)(rs)
   def apply(we: ResultName[WorkflowEngine])(rs: WrappedResultSet): WorkflowEngine = new WorkflowEngine(
@@ -41,7 +40,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
     workflowName = rs.get(we.workflowName),
     workflowDescription = rs.get(we.workflowDescription),
     path = rs.get(we.path),
-    method = rs.get(we.method),
     enableRole = rs.get(we.enableRole),
     workflowStepId = rs.get(we.workflowStepId),
     workflowStepNextId = rs.get(we.workflowStepNextId),
@@ -93,7 +91,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
     workflowName: Option[String] = None,
     workflowDescription: Option[String] = None,
     path: Option[String] = None,
-    method: Option[String] = None,
     enableRole: Option[String] = None,
     workflowStepId: Option[Int] = None,
     workflowStepNextId: Option[Int] = None,
@@ -108,7 +105,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
         column.workflowName -> workflowName,
         column.workflowDescription -> workflowDescription,
         column.path -> path,
-        column.method -> method,
         column.enableRole -> enableRole,
         column.workflowStepId -> workflowStepId,
         column.workflowStepNextId -> workflowStepNextId,
@@ -126,7 +122,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
       workflowName = workflowName,
       workflowDescription = workflowDescription,
       path = path,
-      method = method,
       enableRole = enableRole,
       workflowStepId = workflowStepId,
       workflowStepNextId = workflowStepNextId,
@@ -144,7 +139,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
         'workflowName -> entity.workflowName,
         'workflowDescription -> entity.workflowDescription,
         'path -> entity.path,
-        'method -> entity.method,
         'enableRole -> entity.enableRole,
         'workflowStepId -> entity.workflowStepId,
         'workflowStepNextId -> entity.workflowStepNextId,
@@ -158,7 +152,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
       workflow_name,
       workflow_description,
       path,
-      method,
       enable_role,
       workflow_step_id,
       workflow_step_next_id,
@@ -172,7 +165,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
       {workflowName},
       {workflowDescription},
       {path},
-      {method},
       {enableRole},
       {workflowStepId},
       {workflowStepNextId},
@@ -192,7 +184,6 @@ object WorkflowEngine extends SQLSyntaxSupport[WorkflowEngine] {
         column.workflowName -> entity.workflowName,
         column.workflowDescription -> entity.workflowDescription,
         column.path -> entity.path,
-        column.method -> entity.method,
         column.enableRole -> entity.enableRole,
         column.workflowStepId -> entity.workflowStepId,
         column.workflowStepNextId -> entity.workflowStepNextId,

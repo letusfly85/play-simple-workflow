@@ -53,7 +53,6 @@
         <b-form-input id="v_text" type="text" value="" v-model="form.workflow_group_id" class="form-control"></b-form-input>
         <br/>
         <b-form-select v-model="form.path" :options="options" class="mb-3"></b-form-select>
-        <b-form-select v-model="form.method" :options="methodOptions" class="mb-3"></b-form-select>
         <b-form-input value="" v-model="form.step_id" class="form-control"></b-form-input>
         <b-form-checkbox value="" v-model="form.is_first_step" class="form-control"></b-form-checkbox>
         <b-form-checkbox value="" v-model="form.is_last_step" class="form-control"></b-form-checkbox>
@@ -85,8 +84,7 @@ export default {
   data () {
     return {
       options: ['/orders', '/items', '/attachments/:itemId'],
-      methodOptions: ['GET', 'POST', 'PUT', 'DELETE'],
-      fields: ['id', 'workflow_id', 'path', 'method', 'step_id', 'is_first_step', 'is_last_step', 'update'],
+      fields: ['id', 'workflow_id', 'path', 'step_id', 'is_first_step', 'is_last_step', 'update'],
       addToggle: false,
       workflowEngines: [],
       deleteRowId: 0,
@@ -94,7 +92,6 @@ export default {
         wid: 0,
         workflow_id: '0',
         path: '/',
-        method: 'GET',
         step_id: 0,
         is_first_step: false,
         is_last_step: false
@@ -114,7 +111,6 @@ export default {
         id: 0, // dummy value
         workflow_id: Number(this.form.workflow_id),
         path: this.form.path,
-        method: this.form.method,
         step_id: Number(this.form.step_id),
         is_first_step: this.form.is_first_step,
         is_last_step: this.form.is_last_step
@@ -133,7 +129,6 @@ export default {
         id: Number(this.form.wid),
         workflow_id: Number(this.form.workflow_id),
         path: this.form.path,
-        method: this.form.method,
         step_id: Number(this.form.step_id),
         is_first_step: this.form.is_first_step,
         is_last_step: this.form.is_last_step
