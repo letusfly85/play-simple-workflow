@@ -23,15 +23,9 @@ class OrderController @Inject()(
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index = addToken(Action { implicit request =>
-    Logger.info("enter order controller")
-
-    Ok(views.html.orders(""))
-  })
-
-  def list = Action {
+  def list = addToken(Action {
     Ok(JsObject.empty)
-  }
+  })
 
   def show(id: String) = Action {
     Ok(views.html.index("Your new application is ready."))

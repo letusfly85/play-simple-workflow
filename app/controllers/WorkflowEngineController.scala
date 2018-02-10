@@ -117,10 +117,6 @@ class WorkflowEngineController @Inject()(
 
   })
 
-  def index = addToken(Action { implicit request =>
-    Ok(views.html.workflowEngine("Your new application is ready."))
-  })
-
   def findBelong = checkToken(Action { implicit request =>
     val maybeUserId = request.queryString.get("user_id")
     maybeUserId match {
@@ -193,7 +189,7 @@ class WorkflowEngineController @Inject()(
               updatedAt = new org.joda.time.DateTime
             )
 
-            Ok(views.html.workflowEngine("Your new application is ready."))
+            Ok(JsObject.empty)
 
           case JsError(e) =>
             Logger.info(s"error ${e.toString()}")

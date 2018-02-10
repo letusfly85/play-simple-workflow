@@ -16,13 +16,9 @@ class ItemController @Inject()(
     assets: AssetsFinder
   ) extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
-  def index = Action { implicit request =>
-    Ok(views.html.items(""))
-  }
-
-  def list = Action {
+  def list = addToken(Action {
     Ok(JsObject.empty)
-  }
+  })
 
   def show(id: String) = Action {
     Ok(JsObject.empty)

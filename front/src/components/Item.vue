@@ -53,7 +53,7 @@ export default {
       })
     },
     search: function () {
-      let targetPath = baseUrl + '/items/list'
+      let targetPath = baseUrl + '/items'
       let self = this
       axios.get(targetPath, {}).then(response => {
         self.items = response.data

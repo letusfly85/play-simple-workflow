@@ -16,10 +16,9 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /workflow-engines/init      controllers.WorkflowEngineController.init
 POST    /workflow-engines/routes    controllers.WorkflowEngineController.routes
 
-GET     /workflow-engines           controllers.WorkflowEngineController.index
-GET     /workflow-engines/list      controllers.WorkflowEngineController.list
+GET     /workflow-engines           controllers.WorkflowEngineController.list
 
-GET     /workflow-statuses/list      controllers.WorkflowStatusController.list
+GET     /workflow-statuses/list     controllers.WorkflowStatusController.list
 
 GET     /workflow-engines/belong    controllers.WorkflowEngineController.findBelong
 
@@ -31,7 +30,6 @@ DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy
 
 DELETE  /workflow-engines/all/:id   controllers.WorkflowEngineController.destroyAll(id: String)
 
-GET     /items                      controllers.ItemController.index
 GET     /items                      controllers.ItemController.list
 GET     /items/:id                  controllers.ItemController.show(id: String)
 
@@ -41,11 +39,8 @@ POST    /attachments/:itemId        controllers.AttachmentController.create(item
 GET     /orders/new                 controllers.OrderController.confirm
 POST    /orders/new                 controllers.OrderController.create
 
-GET     /orders                     controllers.OrderController.index
-GET     /orders/list                controllers.OrderController.list
+GET     /orders                     controllers.OrderController.list
 GET     /orders/:id                 controllers.OrderController.show(id: String)
 
 GET     /orders/:id/review          controllers.OrderController.review(id: String)
 #POST    /orders/:id/review          controllers.OrderController.index
-
-GET     /orders                     controllers.OrderController.index
