@@ -280,4 +280,17 @@ class WorkflowEngineController @Inject()(
     }))
   })
 
+  def destroyAll(workflowId: String) = checkToken(Action { implicit request =>
+    WorkflowEngine.findAllBy(sqls.eq(WorkflowEngine.column.workflowId, workflowId)).foreach { engine =>
+        Logger.info(s"deleting ${engine.id} ${engine.path}")
+
+        WorkflowStatus.findAllBy(
+          sqls.eq(WorkflowStatus.column.workflowId, engine.workflowId)
+            .and.eq(WorkflowStatus.column.workflowStepId, engine.workflowStepId)
+        ).foreach(ws => ws.destroy())
+        engine.destroy()
+    }
+
+    Ok(JsObject.empty)
+  })
 }
