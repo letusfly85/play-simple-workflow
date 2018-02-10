@@ -1,5 +1,12 @@
 <template>
   <div id="Item">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <ol v-for="workflow_status in workflow_statuses" v-bind:key="workflow_status.id">
+          <li class="breadcrumb-item"><a v-bind:href="'#' + workflow_status.path">{{ workflow_status.path }}</a></li>
+        </ol>
+      </ol>
+    </nav>
     <div>
       <h3>Item</h3>
     </div>
@@ -61,7 +68,7 @@ export default {
         console.log(error)
       })
 
-      targetPath = baseUrl + '/workflow-statues/list?user_id=' + this.user_id
+      targetPath = baseUrl + '/workflow-statuses/list?user_id=' + this.user_id
       axios.get(targetPath, {}).then(function (response) {
         console.log(response.data)
         self.workflow_statuses = response.data

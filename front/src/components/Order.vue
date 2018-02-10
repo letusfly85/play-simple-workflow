@@ -1,5 +1,10 @@
 <template>
   <div id="Order">
+    <ol class="breadcrumb">
+      <ol v-for="workflow_status in workflow_statuses" v-bind:key="workflow_status.id">
+        <li class="breadcrumb-item"><a v-bind:href="'#' + workflow_status.path">{{ workflow_status.path }}</a></li>
+      </ol>
+    </ol>
     <div>
       <h3>Order</h3>
     </div>
@@ -20,6 +25,7 @@ export default {
   data () {
     return {
       orders: [],
+      workflow_statuses: [],
       user_id: 0,
       workflow_id: 0,
       workflow_step_id: 0
@@ -56,6 +62,14 @@ export default {
         console.log(response.data)
         self.workflow_id = response.data.workflow_id
         self.workflow_step_id = response.data.workflow_step_id
+      }).catch(function (error) {
+        console.log(error)
+      })
+
+      targetPath = baseUrl + '/workflow-statuses/list?user_id=' + this.user_id
+      axios.get(targetPath, {}).then(function (response) {
+        console.log(response.data)
+        self.workflow_statuses = response.data
       }).catch(function (error) {
         console.log(error)
       })
