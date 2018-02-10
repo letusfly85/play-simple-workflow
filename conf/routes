@@ -28,7 +28,7 @@ DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy
 
 DELETE  /workflow-engines/all/:id   controllers.WorkflowEngineController.destroyAll(id: String)
 
-GET     /workflow-statuses/:id      controllers.WorkflowStatusController.list(id: String)
+GET     /workflow-statuses          controllers.WorkflowStatusController.list
 
 GET     /workflow-status-groups     controllers.WorkflowStatusController.groupList
 

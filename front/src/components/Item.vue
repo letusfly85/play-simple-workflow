@@ -66,18 +66,18 @@ export default {
         console.log(error)
       })
 
-      targetPath = baseUrl + '/workflow-engines/belong/ ' + 0 + '?user_id=' + this.user_id
+      targetPath = baseUrl + '/workflow-statuses?user_id=' + this.user_id
       axios.get(targetPath, {}).then(function (response) {
-        console.log(response.data)
-        self.workflow_id = response.data.workflow_id
-        self.workflow_step_id = response.data.workflow_step_id
-      }).catch(function (error) {
-        console.log(error)
-      })
+        const workflowId = response.data[0].workflow_id
+        targetPath = baseUrl + '/workflow-engines/belong/ ' + workflowId + '?user_id=' + self.user_id
 
-      targetPath = baseUrl + '/workflow-statuses/' + 0 + '?user_id=' + this.user_id
-      axios.get(targetPath, {}).then(function (response) {
-        console.log(response.data)
+        axios.get(targetPath, {}).then(function (response) {
+          console.log(response.data)
+          self.workflow_id = response.data.workflow_id
+          self.workflow_step_id = response.data.workflow_step_id
+        }).catch(function (error) {
+          console.log(error)
+        })
         self.workflow_statuses = response.data
       }).catch(function (error) {
         console.log(error)

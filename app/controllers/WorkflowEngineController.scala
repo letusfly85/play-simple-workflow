@@ -28,6 +28,26 @@ class WorkflowEngineController @Inject()(
           sqls.eq(WorkflowEngine.column.workflowId, workflowId)
             .and.eq(WorkflowEngine.column.workflowStepId, 1))
 
+        val maybeGroup = WorkflowStatusGroup.findBy(
+          sqls.eq(WorkflowStatusGroup.column.workflowId, workflowId)
+        )
+        maybeGroup match {
+          case Some(group) =>
+            group.copy(
+              isCurrent = Some(true),
+              updatedAt = new org.joda.time.DateTime
+            ).save()
+          case None =>
+        }
+        WorkflowStatusGroup.findAllBy(
+          sqls.ne(WorkflowStatusGroup.column.workflowId, workflowId)
+        ).foreach{group =>
+          group.copy(
+            isCurrent = Some(false),
+            updatedAt = new org.joda.time.DateTime
+          ).save()
+        }
+
         maybeEngine match {
           case Some(engine) =>
             Logger.info(engine.toString)

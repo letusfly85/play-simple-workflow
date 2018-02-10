@@ -10,7 +10,8 @@ case class WorkflowStatusGroup(
   workflowId: Int,
   runningStatus: Int,
   createdAt: DateTime,
-  updatedAt: DateTime) {
+  updatedAt: DateTime,
+  isCurrent: Option[Boolean] = None) {
 
   def save()(implicit session: DBSession = WorkflowStatusGroup.autoSession): WorkflowStatusGroup = WorkflowStatusGroup.save(this)(session)
 
@@ -25,7 +26,7 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
 
   override val tableName = "workflow_status_group"
 
-  override val columns = Seq("id", "user_id", "workflow_group_id", "workflow_id", "running_status", "created_at", "updated_at")
+  override val columns = Seq("id", "user_id", "workflow_group_id", "workflow_id", "running_status", "created_at", "updated_at", "is_current")
 
   def apply(wsg: SyntaxProvider[WorkflowStatusGroup])(rs: WrappedResultSet): WorkflowStatusGroup = apply(wsg.resultName)(rs)
   def apply(wsg: ResultName[WorkflowStatusGroup])(rs: WrappedResultSet): WorkflowStatusGroup = new WorkflowStatusGroup(
@@ -35,7 +36,8 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
     workflowId = rs.get(wsg.workflowId),
     runningStatus = rs.get(wsg.runningStatus),
     createdAt = rs.get(wsg.createdAt),
-    updatedAt = rs.get(wsg.updatedAt)
+    updatedAt = rs.get(wsg.updatedAt),
+    isCurrent = rs.get(wsg.isCurrent)
   )
 
   val wsg = WorkflowStatusGroup.syntax("wsg")
@@ -80,7 +82,8 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
     workflowId: Int,
     runningStatus: Int,
     createdAt: DateTime,
-    updatedAt: DateTime)(implicit session: DBSession = autoSession): WorkflowStatusGroup = {
+    updatedAt: DateTime,
+    isCurrent: Option[Boolean] = None)(implicit session: DBSession = autoSession): WorkflowStatusGroup = {
     val generatedKey = withSQL {
       insert.into(WorkflowStatusGroup).namedValues(
         column.userId -> userId,
@@ -88,7 +91,8 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
         column.workflowId -> workflowId,
         column.runningStatus -> runningStatus,
         column.createdAt -> createdAt,
-        column.updatedAt -> updatedAt
+        column.updatedAt -> updatedAt,
+        column.isCurrent -> isCurrent
       )
     }.updateAndReturnGeneratedKey.apply()
 
@@ -99,7 +103,8 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
       workflowId = workflowId,
       runningStatus = runningStatus,
       createdAt = createdAt,
-      updatedAt = updatedAt)
+      updatedAt = updatedAt,
+      isCurrent = isCurrent)
   }
 
   def batchInsert(entities: Seq[WorkflowStatusGroup])(implicit session: DBSession = autoSession): List[Int] = {
@@ -110,21 +115,24 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
         'workflowId -> entity.workflowId,
         'runningStatus -> entity.runningStatus,
         'createdAt -> entity.createdAt,
-        'updatedAt -> entity.updatedAt))
+        'updatedAt -> entity.updatedAt,
+        'isCurrent -> entity.isCurrent))
     SQL("""insert into workflow_status_group(
       user_id,
       workflow_group_id,
       workflow_id,
       running_status,
       created_at,
-      updated_at
+      updated_at,
+      is_current
     ) values (
       {userId},
       {workflowGroupId},
       {workflowId},
       {runningStatus},
       {createdAt},
-      {updatedAt}
+      {updatedAt},
+      {isCurrent}
     )""").batchByName(params: _*).apply[List]()
   }
 
@@ -137,7 +145,8 @@ object WorkflowStatusGroup extends SQLSyntaxSupport[WorkflowStatusGroup] {
         column.workflowId -> entity.workflowId,
         column.runningStatus -> entity.runningStatus,
         column.createdAt -> entity.createdAt,
-        column.updatedAt -> entity.updatedAt
+        column.updatedAt -> entity.updatedAt,
+        column.isCurrent -> entity.isCurrent
       ).where.eq(column.id, entity.id)
     }.update.apply()
     entity
