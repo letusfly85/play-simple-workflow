@@ -143,6 +143,7 @@ export default {
     background-color: #ced4da;
     opacity: 0.7;
     max-width: 20rem;
+    width: 15rem;
     margin-left: 20px;
     float: left;
   }
