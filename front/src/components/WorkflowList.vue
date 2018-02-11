@@ -8,8 +8,7 @@
     <div v-for="workflow in workflowList" v-bind:key="workflow.id">
         <b-card
           :title="String(workflow.workflow_id)"
-          style="max-width: 20rem; margin-left: 20px;"
-          class="mb-4"
+          :class="[workflow.is_current? 'active-card' : 'inactive-card']"
         >
 
           <div v-if="workflow.running_status===0">
@@ -72,3 +71,23 @@ export default {
   }
 }
 </script>
+<style>
+  .active-card {
+    background-color: #9fcdff;
+    max-width: 20rem;
+    margin-left: 20px;
+    float: left;
+  }
+  .active-card:hover {
+    background-color: mediumturquoise;
+    opacity: 0.7;
+  }
+
+  .inactive-card {
+    background-color: #ced4da;
+    opacity: 0.7;
+    max-width: 20rem;
+    margin-left: 20px;
+    float: left;
+  }
+</style>

@@ -77,7 +77,8 @@ class WorkflowStatusController @Inject()(
         WorkflowStatusGroupEntity(
           id = wsg.id,
           workflowId = wsg.workflowId,
-          runningStatus = wsg.runningStatus
+          runningStatus = wsg.runningStatus,
+          isCurrent = wsg.isCurrent.getOrElse(false)
         )
       }
     ))
