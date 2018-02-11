@@ -29,8 +29,9 @@
               </div>
               <div v-if="workflowStatusMap[workflow.before_workflow_id] === 1">
                 <b-btn
+                  type="submit"
                   variant="primary">
-                  Continue Workflow
+                  Start Workflow
                 </b-btn>
               </div>
               <div v-if="workflowStatusMap[workflow.before_workflow_id] === undefined">
