@@ -7,6 +7,12 @@
     >
     <div v-for="workflow in workflowList" v-bind:key="workflow.id">
         <b-card
+          :sub-title="'dependency is ' + String(workflow.before_workflow_id)"
+          class="inactive-dependency-card"
+          v-if="workflow.before_workflow_id"
+        >
+        </b-card>
+        <b-card
           :title="String(workflow.workflow_id)"
           :class="[workflow.is_current? 'active-card' : 'inactive-card']"
         >
@@ -19,6 +25,21 @@
           <div v-if="!(workflow.running_status===0)">
             <b-button href="#" class="btn-secondary" disabled>Your Workflow Done</b-button>
           </div>
+          <br/>
+          <b-form :id="String(workflow.workflow_id)" @submit="addDependency(workflow.workflow_id)">
+            <b-button :pressed.sync="workflow.toggle" class="btn-outline-success">Dependency</b-button>
+            <div v-if="workflow.toggle">
+              <br/>
+              <b-form-select
+                v-model="selectedDependencyId"
+                :options="workflow.otherIdList"
+                @change="workflow.updateButton=true"
+                class="mb-3" />
+            </div>
+            <div v-if="workflow.updateButton">
+              <b-button type="submit" class="btn-success">Add Dependency</b-button>
+            </div>
+          </b-form>
         </b-card>
     </div>
     </b-card>
@@ -41,7 +62,8 @@ export default {
   data () {
     return {
       fields: ['id', 'workflow_id', {'running_status': 'status'}],
-      workflowList: []
+      workflowList: [],
+      selectedDependencyId: null
     }
   },
   methods: {
@@ -49,8 +71,41 @@ export default {
       let targetPath = baseUrl + '/workflow-status-groups'
 
       axios.get(targetPath).then(response => {
-        this.workflowList = response.data
+        let workflowIdList = response.data.map(function (workflow) {
+          return workflow.workflow_id
+        })
+        this.workflowList = response.data.map(function (workflow) {
+          workflow.toggle = false
+          workflow.updateButton = false
+          workflow.otherIdList = []
+
+          workflowIdList.forEach(function (id) {
+            if (workflow.workflow_id !== id) {
+              workflow.otherIdList.push(id)
+            }
+          })
+          return workflow
+        })
       }).catch(error => {
+        console.log(error)
+      })
+    },
+    addDependency: function (workflowId) {
+      console.log(workflowId)
+      console.log(this.selectedDependencyId)
+
+      let targetPath = baseUrl + '/workflow-engine-groups'
+      let params = {
+        workflow_id: workflowId,
+        before_workflow_id: this.selectedDependencyId
+      }
+
+      console.log(params)
+      event.preventDefault()
+      axios.put(targetPath, params).then(response => {
+        console.log(response.data)
+        this.research()
+      }).catch(function (error) {
         console.log(error)
       })
     },
@@ -75,6 +130,7 @@ export default {
   .active-card {
     background-color: #9fcdff;
     max-width: 20rem;
+    width: 15rem;
     margin-left: 20px;
     float: left;
   }
@@ -89,5 +145,15 @@ export default {
     max-width: 20rem;
     margin-left: 20px;
     float: left;
+  }
+
+  .inactive-dependency-card {
+    background-color: #ececf6;
+    max-width: 20rem;
+    width: 15rem;
+    height: 2rem;
+    opacity: 0.5;
+    margin-bottom: 3px;
+    margin-left: 20px;
   }
 </style>

@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 
-import entities.{WorkflowEngineEntity, WorkflowRoutingEntity}
+import entities.{WorkflowEngineEntity, WorkflowEngineGroupEntity, WorkflowRoutingEntity}
 import play.api.mvc._
 import models.{WorkflowEngine, WorkflowEngineGroup, WorkflowStatus, WorkflowStatusGroup}
 import org.webjars.play.WebJarsUtil
@@ -299,6 +299,33 @@ class WorkflowEngineController @Inject()(
                 isLastStep = we.isLastStep.getOrElse(false)
               )
             }))
+
+          case JsError(e) =>
+            Logger.info(s"error ${e.toString()}")
+            BadRequest(Json.obj("error_message" -> JsError.toJson(e).toString()))
+        }
+
+      case None =>
+        Logger.info("no json found")
+        BadRequest(Json.obj("error_message" -> "not found json"))
+    }
+  })
+
+  def updateGroupDependency = checkToken(Action {implicit request =>
+    request.body.asJson match {
+      case Some(json) =>
+        Json.fromJson[WorkflowEngineGroupEntity](json) match {
+          case JsSuccess(weg, _) =>
+            WorkflowEngineGroup.findBy(sqls.eq(WorkflowEngineGroup.column.workflowId, weg.workflowId)) match {
+              case Some(group) =>
+                group.copy(
+                  beforeWorkflowId = Some(weg.beforeWorkflowId),
+                  updatedAt = new org.joda.time.DateTime()
+                ).save()
+
+              case None =>
+            }
+            Ok(JsObject.empty)
 
           case JsError(e) =>
             Logger.info(s"error ${e.toString()}")

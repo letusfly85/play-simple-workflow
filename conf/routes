@@ -24,6 +24,8 @@ POST    /workflow-engines           controllers.WorkflowEngineController.create
 
 PUT     /workflow-engines           controllers.WorkflowEngineController.update
 
+PUT     /workflow-engine-groups     controllers.WorkflowEngineController.updateGroupDependency
+
 DELETE  /workflow-engines/:id       controllers.WorkflowEngineController.destroy(id: String)
 
 DELETE  /workflow-engines/all/:id   controllers.WorkflowEngineController.destroyAll(id: String)
