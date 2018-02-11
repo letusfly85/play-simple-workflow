@@ -6,20 +6,40 @@
       style="margin-top: 5px; margin-right: 5px; margin-left: 5px;"
     >
     <div v-for="workflow in workflowList" v-bind:key="workflow.id">
+
+      <div v-if="workflowStatusMap[workflow.before_workflow_id] === 0">
         <b-card
           :sub-title="'dependency is ' + String(workflow.before_workflow_id)"
           class="inactive-dependency-card"
-          v-if="workflow.before_workflow_id"
         >
         </b-card>
+      </div>
         <b-card
           :title="String(workflow.workflow_id)"
-          :class="[workflow.is_current? 'active-card' : 'inactive-card']"
+          :class="[workflow.is_current ? 'active-card' : 'inactive-card']"
         >
-
           <div v-if="workflow.running_status===0">
             <b-form @submit="continueWorkflow(workflow.workflow_id)">
-              <b-button type="submit"  variant="primary">Continue Workflow</b-button>
+              <div v-if="workflowStatusMap[workflow.before_workflow_id] === 0">
+              <b-btn
+                disabled
+                variant="danger">
+                Do Depend Workflow
+              </b-btn>
+              </div>
+              <div v-if="workflowStatusMap[workflow.before_workflow_id] === 1">
+                <b-btn
+                  variant="primary">
+                  Continue Workflow
+                </b-btn>
+              </div>
+              <div v-if="workflowStatusMap[workflow.before_workflow_id] === undefined">
+              <b-btn
+                type="submit"
+                variant="primary">
+                Continue Workflow
+              </b-btn>
+              </div>
             </b-form>
           </div>
           <div v-if="!(workflow.running_status===0)">
@@ -63,6 +83,7 @@ export default {
     return {
       fields: ['id', 'workflow_id', {'running_status': 'status'}],
       workflowList: [],
+      workflowStatusMap: {},
       selectedDependencyId: null
     }
   },
@@ -70,6 +91,7 @@ export default {
     research: function () {
       let targetPath = baseUrl + '/workflow-status-groups'
 
+      var self = this
       axios.get(targetPath).then(response => {
         let workflowIdList = response.data.map(function (workflow) {
           return workflow.workflow_id
@@ -78,6 +100,8 @@ export default {
           workflow.toggle = false
           workflow.updateButton = false
           workflow.otherIdList = []
+
+          self.workflowStatusMap[workflow.workflow_id] = workflow.running_status
 
           workflowIdList.forEach(function (id) {
             if (workflow.workflow_id !== id) {
@@ -91,16 +115,12 @@ export default {
       })
     },
     addDependency: function (workflowId) {
-      console.log(workflowId)
-      console.log(this.selectedDependencyId)
-
       let targetPath = baseUrl + '/workflow-engine-groups'
       let params = {
         workflow_id: workflowId,
         before_workflow_id: this.selectedDependencyId
       }
 
-      console.log(params)
       event.preventDefault()
       axios.put(targetPath, params).then(response => {
         console.log(response.data)
