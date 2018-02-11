@@ -7,7 +7,7 @@
     >
     <div v-for="workflow in workflowList" v-bind:key="workflow.id">
 
-      <div v-if="workflowStatusMap[workflow.before_workflow_id] === 0">
+      <div v-if="workflow.before_workflow_id">
         <b-card
           :sub-title="'dependency is ' + String(workflow.before_workflow_id)"
           class="inactive-dependency-card"
